@@ -1,0 +1,4 @@
+== 0.1.0 / 2008-11-14
+
+* Initial release
+  - for Craig and Rija - enjoy :D
