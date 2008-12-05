@@ -119,7 +119,7 @@ module RStomp
           }
         headers['client-id'] = @client_id unless @client_id.nil?
         # logger.debug "headers = #{headers.inspect} client_id = #{ @client_id }"
-        while s.nil? or @failure != nil or closed?
+        while s.nil? or @failure != nil
           begin
             #p [:connecting, :socket, s, :failure, @failure, @failure.class.ancestors, :closed, closed?]
             logger.info( { :status => :connecting, :host => @host, :port => @port }.inspect )
@@ -137,11 +137,21 @@ module RStomp
           rescue RStompException, SystemCallError => e
             #p [:Exception, e]
             @failure = e
+            # ensure socket is closed
+            begin
+              s.close
+            rescue Object => e
+            end
             s = nil
             @open = false
             handle_error ConnectionError, "connect failed: '#{e.message}' will retry in #{@reconnect_delay}"
             sleep(@reconnect_delay)
           end
+        end
+        # ensure socket is closed before replacing
+        begin
+          @socket.close
+        rescue Object => e
         end
         @socket = s
       end

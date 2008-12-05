@@ -185,9 +185,7 @@ module SMQueue
       if a.kind_of?(Hash) && a.key?(:configuration)
         args = [a[:configuration]]
       end
-      smq = Adapter.create(*args, &block)
-      #smq.connect
-      smq
+      Adapter.create(*args, &block)
     end
   end
 
