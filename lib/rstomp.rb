@@ -148,11 +148,6 @@ module RStomp
             sleep(@reconnect_delay)
           end
         end
-        # ensure socket is closed before replacing
-        begin
-          @socket.close
-        rescue Object => e
-        end
         @socket = s
       end
     end
