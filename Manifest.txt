@@ -4,7 +4,6 @@ README.txt
 Rakefile
 lib/rstomp.rb
 lib/smqueue.rb
-lib/smqueue/adapters/adapters.txt
 lib/smqueue/adapters/spread.rb
 lib/smqueue/adapters/stdio.rb
 lib/smqueue/adapters/stomp.rb
