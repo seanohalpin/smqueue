@@ -70,7 +70,7 @@ EDOC
       loop do
         msg = connection.receive
         if msg.data?
-          m = SMQueue::Message(
+          m = SMQueue::Message.new(
                                :headers => {
                                  :private_name => configuration.private_name,
                                  :sender => msg.sender,

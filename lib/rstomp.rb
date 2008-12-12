@@ -139,7 +139,7 @@ module RStomp
             @failure = e
             # ensure socket is closed
             begin
-              s.close
+              s.close if s
             rescue Object => e
             end
             s = nil
@@ -218,10 +218,26 @@ module RStomp
       headers[:destination] = destination
       transmit "SEND", headers, message
     end
-  
+
+    # drain socket
+    def discard_all_until_eof
+      @read_semaphore.synchronize do
+        while @socket do
+          break if @socket.gets.nil?
+        end
+      end
+    end
+    private :discard_all_until_eof
+    
     # Close this connection
     def disconnect(headers = {})
       transmit "DISCONNECT", headers
+      discard_all_until_eof
+      begin
+        @socket.close
+      rescue Object => e
+      end
+      @socket = nil
       @open = false
     end
   

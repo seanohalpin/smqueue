@@ -151,7 +151,6 @@ module SMQueue
       #p [:ack, message.headers["message-id"]]
       if message.headers["message-id"].to_s.strip != "" && subscription_headers["ack"].to_s == "client"
         SMQueue.dbg { [:smqueue, :ack, :message, message].inspect }
-        #connection.ack message.headers["message-id"], { :receipt => ""}
         connection.ack message.headers["message-id"], { }
       else
         SMQueue.dbg { [:smqueue, :ack, :not_acknowledging, message].inspect }
