@@ -4,6 +4,8 @@ module SMQueue
     class Configuration < AdapterConfiguration
       has :host, :kind => String, :default => ""
       has :port, :kind => Integer, :default => 61613  # Stomp
+      has :secondary_host, :kind => String, :default => ""
+      has :secondary_port, :kind => Integer, :default => 61613
       has :name, :kind => String, :default => ""
       has :user, :kind => String, :default => ""
       has :password, :kind => String, :default => ""
