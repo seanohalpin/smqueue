@@ -12,7 +12,7 @@ end
 ensure_in_path 'lib'
 require 'smqueue'
 
-task :default => 'spec:run'
+task :default => "test"
 
 PROJ.name = 'smqueue'
 PROJ.authors = "Sean O'Halpin"

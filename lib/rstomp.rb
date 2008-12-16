@@ -84,9 +84,12 @@ module RStomp
     # - :logger => Logger.new(params[:logfile])
     #
     def initialize(params = {})
-      params = DEFAULT_OPTIONS.merge(params)
+      params = DEFAULT_OPTIONS.merge(params)      
       @host = params[:host]
       @port = params[:port]
+      @secondary_host = params[:secondary_host]
+      @secondary_port = params[:secondary_port]
+      
       @user = params[:user]
       @password = params[:password]
       @reliable = params[:reliable]
@@ -113,6 +116,8 @@ module RStomp
       # SOH: because had nested synchronize in _receive - take outside _receive (in receive) and seems OK
       @socket_semaphore.synchronize do
         s = @socket
+        host = @host
+        port = @port
         headers = {
           :user => @user, 
           :password => @password
@@ -122,9 +127,11 @@ module RStomp
         while s.nil? or @failure != nil
           begin
             #p [:connecting, :socket, s, :failure, @failure, @failure.class.ancestors, :closed, closed?]
-            logger.info( { :status => :connecting, :host => @host, :port => @port }.inspect )
+            logger.info( { :status => :connecting, :host => host, :port => port }.inspect )
             @failure = nil
-            s = TCPSocket.open(@host, @port)
+            
+            s = TCPSocket.open(host, port)
+            
             _transmit(s, "CONNECT", headers)
             @connect = _receive(s)
             @open = true
@@ -144,7 +151,21 @@ module RStomp
             end
             s = nil
             @open = false
-            handle_error ConnectionError, "connect failed: '#{e.message}' will retry in #{@reconnect_delay}"
+            
+            # Try connecting to the slave instead
+            # Or if the slave goes down, connect back to the master            
+            unless @secondary_host.empty?              
+              # if it's not a reliable queue, then if the slave queue doesn't work then fail              
+              if !@reliable && (host == @secondary_host) && (port == @secondary_port)             
+                host = ''
+                port = ''
+              else # switch the host from primary to secondary (or back again)
+                host = (host == @host ? @secondary_host : @host)
+                port = (port == @port ? @secondary_port : @port)
+              end
+            end
+            
+            handle_error ConnectionError, "connect failed: '#{e.message}' will retry in #{@reconnect_delay} on #{host} port #{port}", host.empty?
             sleep(@reconnect_delay)
           end
         end
