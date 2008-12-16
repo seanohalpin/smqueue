@@ -127,7 +127,7 @@ module RStomp
         while s.nil? or @failure != nil
           begin
             #p [:connecting, :socket, s, :failure, @failure, @failure.class.ancestors, :closed, closed?]
-            logger.info( { :status => :connecting, :host => host, :port => port }.inspect )
+            # logger.info( { :status => :connecting, :host => host, :port => port }.inspect )
             @failure = nil
             
             s = TCPSocket.open(host, port)
