@@ -1,28 +1,33 @@
-require 'test/unit'
-require 'smqueue'
-require 'rstomp'
-require 'mocha'
+require File.dirname(__FILE__) + '/helper'
 
 class TestRStompConnection < Test::Unit::TestCase
 
   # Tests to see if when a primary queue falls over whether it rollsover to use the secondary.
-  def test_if_primary_queue_fails_rollover_to_secondary
+  test "if primary queue fails should rollover to secondary" do
     TCPSocket.expects(:open).with("localhost", 61613).raises RStomp::RStompException
     TCPSocket.expects(:open).with("secondary", 1234).returns true
     
     stub_connection_calls_to_queue
-    connection = RStomp::Connection.new(YAML.load(configuration))
+    SMQueue.new(:configuration => YAML.load(configuration)).connect
   end
-  
+
   # Tests to see if when a primary queue falls over whether it rollsover to use the secondary even for unreliable queues.
-  def test_if_primary_queue_fails_rollover_to_secondary_with_unreliable_queue
+  test "if primary queue fails should rollover to secondary even if the queue is unreliable" do
     TCPSocket.expects(:open).with("localhost", 61613).raises RStomp::RStompException
     TCPSocket.expects(:open).with("secondary", 1234).returns true
 
     stub_connection_calls_to_queue
-    connection = RStomp::Connection.new(YAML.load(configuration).merge(:reliable => false))
+    SMQueue.new(:configuration => YAML.load(configuration)).connect
   end
 
+  test "multiple calls to connect should swap hosts and ports appropriately" do
+    TCPSocket.expects(:open).with("localhost", 61613).raises(RStomp::RStompException).once
+    TCPSocket.expects(:open).with("secondary", 1234).returns(true).at_least(2)
+
+    stub_connection_calls_to_queue
+    queue = SMQueue.new(:configuration => YAML.load(configuration))
+    2.times { queue.connect }
+  end
   
 private
 

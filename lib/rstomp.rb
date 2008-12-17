@@ -48,6 +48,7 @@ module RStomp
   # Low level connection which maps commands and supports
   # synchronous receives
   class Connection
+    attr_reader :current_host, :current_port
 
     DEFAULT_OPTIONS = {
       :user => "",
