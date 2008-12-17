@@ -6,7 +6,7 @@ require 'mocha'
 class TestRStompConnection < Test::Unit::TestCase
 
   # Tests to see if when a primary queue falls over whether it rollsover to use the secondary.
-  def test_if_primary_queue_fails_rollover_to_secondary    
+  def test_if_primary_queue_fails_rollover_to_secondary
     TCPSocket.expects(:open).with("localhost", 61613).raises RStomp::RStompException
     TCPSocket.expects(:open).with("secondary", 1234).returns true
     

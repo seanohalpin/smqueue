@@ -51,16 +51,16 @@ module RStomp
 
     DEFAULT_OPTIONS = {
       :user => "",
-      :password => "", 
+      :password => "",
       :host => 'localhost',
       :port => 61613,
-      :reliable => false, 
-      :reconnect_delay => 5, 
+      :reliable => false,
+      :reconnect_delay => 5,
       :client_id => nil,
       :logfile => STDERR,
       :logger => nil,
       }
-    
+
     # make them attributes
     DEFAULT_OPTIONS.each do |key, value|
       attr_accessor key
@@ -84,12 +84,15 @@ module RStomp
     # - :logger => Logger.new(params[:logfile])
     #
     def initialize(params = {})
-      params = DEFAULT_OPTIONS.merge(params)      
+      params = DEFAULT_OPTIONS.merge(params)
       @host = params[:host]
       @port = params[:port]
       @secondary_host = params[:secondary_host]
       @secondary_port = params[:secondary_port]
       
+      @current_host = @host
+      @current_port = @port
+
       @user = params[:user]
       @password = params[:password]
       @reliable = params[:reliable]
@@ -106,20 +109,18 @@ module RStomp
       @failure = nil
       @socket = nil
       @open = false
-      
+
       socket
     end
-  
+
     def socket
       # Need to look into why the following synchronize does not work. (SOH: fixed)
       # SOH: Causes Exception ThreadError 'stopping only thread note: use sleep to stop forever' at 235
       # SOH: because had nested synchronize in _receive - take outside _receive (in receive) and seems OK
       @socket_semaphore.synchronize do
         s = @socket
-        host = @host
-        port = @port
         headers = {
-          :user => @user, 
+          :user => @user,
           :password => @password
           }
         headers['client-id'] = @client_id unless @client_id.nil?
@@ -129,9 +130,9 @@ module RStomp
             #p [:connecting, :socket, s, :failure, @failure, @failure.class.ancestors, :closed, closed?]
             # logger.info( { :status => :connecting, :host => host, :port => port }.inspect )
             @failure = nil
-            
-            s = TCPSocket.open(host, port)
-            
+
+            s = TCPSocket.open(@current_host, @current_port)
+
             _transmit(s, "CONNECT", headers)
             @connect = _receive(s)
             @open = true
@@ -151,45 +152,47 @@ module RStomp
             end
             s = nil
             @open = false
-            
-            # Try connecting to the slave instead
-            # Or if the slave goes down, connect back to the master            
-            unless @secondary_host.empty?              
-              # if it's not a reliable queue, then if the slave queue doesn't work then fail              
-              if !@reliable && (host == @secondary_host) && (port == @secondary_port)             
-                host = ''
-                port = ''
-              else # switch the host from primary to secondary (or back again)
-                host = (host == @host ? @secondary_host : @host)
-                port = (port == @port ? @secondary_port : @port)
-              end
-            end
-            
-            handle_error ConnectionError, "connect failed: '#{e.message}' will retry in #{@reconnect_delay} on #{host} port #{port}", host.empty?
+
+            switch_host_and_port unless @secondary_host.empty?
+
+            handle_error ConnectionError, "connect failed: '#{e.message}' will retry in #{@reconnect_delay} on #{@current_host} port #{@current_port}", host.empty?
             sleep(@reconnect_delay)
           end
         end
         @socket = s
       end
     end
-  
+    
+    def switch_host_and_port
+      # Try connecting to the slave instead
+      # Or if the slave goes down, connect back to the master
+      # if it's not a reliable queue, then if the slave queue doesn't work then fail
+      if !@reliable && ((@current_host == @secondary_host) && (@current_port == @secondary_port))
+        @current_host = ''
+        @current_port = ''
+      else # switch the host from primary to secondary (or back again)
+        @current_host = (@current_host == @current_host ? @secondary_host : @current_host)
+        @current_port = (@current_port == @current_port ? @secondary_port : @current_port)
+      end
+    end
+
     # Is this connection open?
     def open?
       @open
     end
-  
+
     # Is this connection closed?
     def closed?
       !open?
     end
-  
+
     # Begin a transaction, requires a name for the transaction
     def begin(name, headers = {})
       headers[:transaction] = name
       transmit "BEGIN", headers
     end
-  
-    # Acknowledge a message, used then a subscription has specified 
+
+    # Acknowledge a message, used then a subscription has specified
     # client acknowledgement ( connection.subscribe "/queue/a", :ack => 'client' )
     #
     # Accepts a transaction header ( :transaction => 'some_transaction_id' )
@@ -197,7 +200,7 @@ module RStomp
       headers['message-id'] = message_id
       transmit "ACK", headers
     end
-      
+
     # Commit a transaction by name
     def commit(name, headers = {})
       headers[:transaction] = name
@@ -209,19 +212,19 @@ module RStomp
       headers[:transaction] = name
       transmit "ABORT", headers
     end
-  
+
     # Subscribe to a destination, must specify a name
     def subscribe(name, headers = {}, subscription_id = nil)
       headers[:destination] = name
       transmit "SUBSCRIBE", headers
-      
+
       # Store the sub so that we can replay if we reconnect.
       if @reliable
         subscription_id = name if subscription_id.nil?
         @subscriptions[subscription_id]=headers
       end
     end
-  
+
     # Unsubscribe from a destination, must specify a name
     def unsubscribe(name, headers = {}, subscription_id = nil)
       headers[:destination] = name
@@ -231,7 +234,7 @@ module RStomp
         @subscriptions.delete(subscription_id)
       end
     end
-  
+
     # Send message to destination
     #
     # Accepts a transaction header ( :transaction => 'some_transaction_id' )
@@ -249,7 +252,7 @@ module RStomp
       end
     end
     private :discard_all_until_eof
-    
+
     # Close this connection
     def disconnect(headers = {})
       transmit "DISCONNECT", headers
@@ -261,7 +264,7 @@ module RStomp
       @socket = nil
       @open = false
     end
-  
+
     # Return a pending message if one is available, otherwise
     # return nil
     def poll
@@ -273,7 +276,7 @@ module RStomp
         end
       end
     end
-      
+
     # Receive a frame, block until the frame is received
     def receive
       # The receive may fail so we may need to retry.
@@ -292,7 +295,7 @@ module RStomp
         end
       end
     end
-    
+
     private
     def _receive( s )
       #logger.debug "_receive"
@@ -318,7 +321,7 @@ module RStomp
               v = (line.strip[line.strip.index(':') + 1, line.strip.length]).strip
               m.headers[k] = v
             end
-          
+
             if m.headers['content-length']
               m.body = s.read m.headers['content-length'].to_i
               # expect an ASCII NUL (i.e. 0)
@@ -358,7 +361,7 @@ module RStomp
       end
       raise exception_class, error_message if force_raise
     end
-    
+
     def transmit(command, headers = {}, body = '')
       # The transmit may fail so we may need to retry.
       # Maybe use retry count?
@@ -375,7 +378,7 @@ module RStomp
         # TODO: sleep here?
       end
     end
-      
+
     private
     def _transmit(s, command, headers={}, body='')
       msg = StringIO.new
@@ -403,11 +406,11 @@ module RStomp
   # Container class for frames, misnamed technically
   class Message
     attr_accessor :headers, :body, :command
-    
+
     def initialize(&block)
       yield(self) if block_given?
     end
-    
+
     def to_s
       "<#{self.class} headers=#{headers.inspect} body=#{body.inspect} command=#{command.inspect} >"
     end
@@ -437,7 +440,7 @@ module RStomp
         params[:host] = $3
         params[:port] = $4
       end
-      
+
       @id_mutex = Mutex.new
       @ids = 1
       @connection = Connection.open(params)
@@ -450,7 +453,7 @@ module RStomp
           message = @connection.receive
           break if message.nil?
           case message.command
-          when 'MESSAGE': 
+          when 'MESSAGE':
             if listener = @listeners[message.headers['destination']]
               listener.call(message)
             end
@@ -462,7 +465,7 @@ module RStomp
         end
       end
     end
-    
+
     # Join the listener thread for this client,
     # generally used to wait for a quit signal
     def join
@@ -487,7 +490,7 @@ module RStomp
       # lets replay any ack'd messages in this transaction
       replay_list = @replay_messages_by_txn[name]
       if replay_list
-        replay_list.each do |message| 
+        replay_list.each do |message|
           if listener = @listeners[message.headers['destination']]
             listener.call(message)
           end
@@ -501,7 +504,7 @@ module RStomp
       @replay_messages_by_txn.delete(txn_id)
       @connection.commit(name, headers)
     end
-    
+
     # Subscribe to a destination, must be passed a block taking one parameter (the message)
     # which will be used as a callback listener
     #
@@ -518,7 +521,7 @@ module RStomp
       @listeners[name] = nil
     end
 
-    # Acknowledge a message, used when a subscription has specified 
+    # Acknowledge a message, used when a subscription has specified
     # client acknowledgement ( connection.subscribe "/queue/a", :ack => 'client' )
     #
     # Accepts a transaction header ( :transaction => 'some_transaction_id' )
@@ -541,7 +544,7 @@ module RStomp
 
     # Send message to destination
     #
-    # If a block is given a receipt will be requested and passed to the 
+    # If a block is given a receipt will be requested and passed to the
     # block on receipt
     #
     # Accepts a transaction header ( :transaction => 'some_transaction_id' )
@@ -556,11 +559,11 @@ module RStomp
     def open?
       @connection.open?
     end
-    
+
     # Close out resources in use by this client
     def close
       @connection.disconnect
-      @running = false 
+      @running = false
     end
 
     private
