@@ -172,8 +172,8 @@ module RStomp
         @current_host = ''
         @current_port = ''
       else # switch the host from primary to secondary (or back again)
-        @current_host = (@current_host == @current_host ? @secondary_host : @current_host)
-        @current_port = (@current_port == @current_port ? @secondary_port : @current_port)
+        @current_host = (@current_host == @host ? @secondary_host : @host)
+        @current_port = (@current_port == @port ? @secondary_port : @port)
       end
     end
 
