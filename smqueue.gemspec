@@ -19,5 +19,6 @@ Gem::Specification.new do |s|
   "lib/smqueue/adapters/stomp.rb"
   ]
   s.test_files = ["test/test_rstomp_connection.rb"]
-  s.add_dependency("doodle", ["> 0.1.9"])
+  s.add_dependency("doodle", [">= 0.1.9"])
+  s.rubyforge_project = 'smqueue'
 end
