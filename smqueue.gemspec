@@ -1,8 +1,6 @@
-require 'smqueue'
-
 Gem::Specification.new do |s|
   s.name     = "smqueue"
-  s.version  = SMQueue::VERSION
+  s.version  = "0.1.0"
   s.summary  = "Simple Message Queue"
   s.email    = 'http://github.com/seanohalpin/smqueue'
   s.homepage = 'http://github.com/seanohalpin/smqueue'
@@ -13,7 +11,7 @@ Gem::Specification.new do |s|
   "Manifest.txt",
   "README.txt",
   "Rakefile",
-  "smqueue",
+  "smqueue.gemspec",
   "lib/rstomp.rb",
   "lib/smqueue.rb",
   "lib/smqueue/adapters/spread.rb",
