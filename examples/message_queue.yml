@@ -1,0 +1,29 @@
+mq: &default_mq
+  :adapter: StompAdapter
+  :host: localhost
+  :port: 61613
+  :reconnect_delay: 5
+
+:input:
+  <<: *default_mq
+  :name: /topic/example.queue
+
+:output:
+  <<: *default_mq
+  :name: /topic/example.queue
+
+:null:
+  :adapter: NullAdapter
+
+:stdio:
+  :adapter: StdioAdapter
+
+:yaml:
+  :adapter: YamlAdapter
+
+:stdio_line:
+  :adapter: StdioLineAdapter
+
+:readline:
+  :adapter: ReadlineAdapter
+
