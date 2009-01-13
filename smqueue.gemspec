@@ -6,7 +6,7 @@ Gem::Specification.new do |s|
   s.homepage = 'http://github.com/seanohalpin/smqueue'
   s.description = "Implements a simple protocol for using message queues, with adapters
   for ActiveMQ, Spread and stdio (for testing)."
-  s.authors  = ["Sean O'Halpin"]
+  s.authors  = ["Sean O'Halpin", "Chris O'Sullivan", "Craig Webster"]
   s.files    = ["History.txt",
   "Manifest.txt",
   "README.txt",
