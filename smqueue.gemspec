@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name     = "smqueue"
-  s.version  = "0.1.0"
+  s.version  = "0.2.0"
   s.summary  = "Simple Message Queue"
   s.email    = 'http://github.com/seanohalpin/smqueue'
   s.homepage = 'http://github.com/seanohalpin/smqueue'
