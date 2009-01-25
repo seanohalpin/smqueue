@@ -1,0 +1,40 @@
+mq: &default_mq
+  :adapter: StompAdapter
+#  :host: localhost
+  :host: 192.168.53.134
+  :port: 61613
+  :reconnect_delay: 5
+
+:announce:
+  :adapter: SpreadAdapter
+  :channel: 4803@localhost
+  :group:   announce
+
+:scheduler:
+  <<: *default_mq
+  :name: /queue/development.scheduler
+  :reliable: true
+
+:change_events:
+  <<: *default_mq
+  :name: /topic/change_events
+  :reliable: true
+
+:input:
+  <<: *default_mq
+  :name: /queue/shared
+  :reliable: true
+
+:output:
+  <<: *default_mq
+  :name: /queue/shared
+  :reliable: true
+
+:readline:
+  :adapter: ReadlineAdapter
+
+:stdio:
+  :adapter: StdioAdapter
+
+:error:
+  :adapter: NullAdapter
