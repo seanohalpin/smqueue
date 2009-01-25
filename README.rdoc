@@ -53,11 +53,13 @@ you'll have to read the source in ./lib/smqueue/adapters/*.rb.
 
 == INSTALL
 
-* sudo gem install doodle smqueue
+For runtime:
+
+  sudo gem install doodle smqueue
 
 For development:
 
-* sudo gem install bones
+  sudo gem install bones
 
 == LICENSE
 
