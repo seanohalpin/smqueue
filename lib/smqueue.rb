@@ -198,13 +198,9 @@ end
 
 # require adapters relative to invocation path first, then from lib
 [$0, __FILE__].each do |path|
-  p [:path, path]
   base_path = File.expand_path(File.dirname(path))
-  p [:base_path, base_path]
   adapter_path = File.join(base_path, 'smqueue', 'adapters', '*.rb')
-  p [:adapter_path, adapter_path]
   Dir[adapter_path].each do |file|
-    p [:file, file]
     begin
       require file
     rescue Object => e

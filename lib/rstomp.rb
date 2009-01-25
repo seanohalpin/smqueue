@@ -203,7 +203,7 @@ module RStomp
               # set KEEPIDLE time (in seconds) - wait one minute
               # before sending KEEPALIVE packet (for testing - use
               # more realistic figure for real)
-              p [:setting_keepalive]
+              #p [:setting_keepalive]
               opt = [60].pack('l')
               s.setsockopt(Socket::IPPROTO_TCP, SocketExtensions::Darwin::TCP_KEEPALIVE, opt)
             when /jruby/
