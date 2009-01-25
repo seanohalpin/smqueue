@@ -3,8 +3,8 @@ Manifest.txt
 README.txt
 Rakefile
 examples/input.rb
-examples/message_queue.yml
 examples/output.rb
+examples/config/example_config.yml
 lib/rstomp.rb
 lib/smqueue.rb
 lib/smqueue/adapters/spread.rb
