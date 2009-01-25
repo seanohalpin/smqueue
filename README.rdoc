@@ -1,7 +1,10 @@
-smqueue
-    by Sean O'Halpin
-    http://github.com/seanohalpin/smqueue
-    version 0.2.1
+= smqueue
+
+by Sean O'Halpin
+
+http://github.com/seanohalpin/smqueue
+
+version 0.2.1
 
 == DESCRIPTION
 
