@@ -1,8 +1,9 @@
 smqueue
     by Sean O'Halpin
     http://github.com/seanohalpin/smqueue
+    version 0.2.1
 
-== DESCRIPTION:
+== DESCRIPTION
 
 Implements a simple protocol for using message queues, with adapters
 for ActiveMQ, Spread and stdio (for testing).
@@ -10,7 +11,7 @@ for ActiveMQ, Spread and stdio (for testing).
 This is a bare-bones release to share with my colleagues - apologies
 for the lack of documentation and tests.
 
-== FEATURES:
+== FEATURES
 
 * simple to use
 * designed primarily for pipeline processing
@@ -19,26 +20,35 @@ for the lack of documentation and tests.
 
 == BUGS
 
-* you need the ruby spread client installed - should remove this
+* let me know!
 
-== SYNOPSIS:
+== SYNOPSIS
 
   require 'smqueue'
-  config = YAML::load(config_file)
+  config = YAML::load(File.read('config.yml'))
   input_queue = SMQueue(config[:input])
   output_queue = SMQueue(config[:output])
-  queue.get do |msg|
+  input_queue.get do |msg|
      # do something with msg
+     new_msg = msg.body
      output_queue.put new_msg
   end
 
-== REQUIREMENTS:
+=== Configuration
 
-* depends on doodle
+The easiest way to configure SMQueue is to use YAML files. An example
+can be found in ./examples/config/example_config.yml.
+
+To find out the complete set of options each adapter supports, for now
+you'll have to read the source in ./lib/smqueue/adapters/*.rb.
+
+== REQUIREMENTS
+
+* depends on doodle >= 0.1.9
 * you need access to an ActiveMQ message broker or Spread publisher
 * development uses bones gem
 
-== INSTALL:
+== INSTALL
 
 * sudo gem install doodle smqueue
 
@@ -46,7 +56,7 @@ For development:
 
 * sudo gem install bones
 
-== LICENSE:
+== LICENSE
 
 (The MIT License)
 
