@@ -56,4 +56,5 @@ module SMQueue
       end
     end
   end
+  ReadLineAdapter = ReadlineAdapter
 end
