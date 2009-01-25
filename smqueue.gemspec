@@ -1,8 +1,8 @@
 Gem::Specification.new do |s|
   s.name     = "smqueue"
-  s.version  = "0.2.0"
+  s.version  = "0.2.1"
   s.summary  = "Simple Message Queue"
-  s.email    = 'http://github.com/seanohalpin/smqueue'
+  s.email    = "seanohalpin@gmail.com"
   s.homepage = 'http://github.com/seanohalpin/smqueue'
   s.description = "Implements a simple protocol for using message queues, with adapters
   for ActiveMQ, Spread and stdio (for testing)."
@@ -14,8 +14,8 @@ Gem::Specification.new do |s|
      "README.txt",
      "Rakefile",
      "examples/input.rb",
-     "examples/message_queue.yml",
      "examples/output.rb",
+     "examples/config/example_config.yml",
      "lib/rstomp.rb",
      "lib/smqueue.rb",
      "lib/smqueue/adapters/spread.rb",
