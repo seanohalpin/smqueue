@@ -23,6 +23,29 @@ require 'thread'
 require 'stringio'
 require 'logger'
 
+
+# use keepalive to detect dead connections (see http://tldp.org/HOWTO/TCP-Keepalive-HOWTO/)
+
+module SocketExtensions
+  # Linux
+  module Linux
+    # /usr/include/netinet/tcp.h
+    TCP_KEEPIDLE  = 4
+    TCP_KEEPINTVL = 5
+    TCP_KEEPCNT   = 6
+  end
+  module Darwin
+    # Mac OSX
+    # tcp.h:#define TCP_KEEPALIVE     0x10    /* idle time used when SO_KEEPALIVE is enabled */
+    TCP_KEEPALIVE = 0x10
+    # these are sysctl vars
+    # /usr/include/netinet/tcp_var.h:#define  TCPCTL_KEEPIDLE         6       /* keepalive idle timer */
+    # /usr/include/netinet/tcp_var.h:#define  TCPCTL_KEEPINTVL        7       /* interval to send keepalives */
+    # /usr/include/netinet/tcp_var.h:#define  TCPCTL_KEEPINIT         10      /* timeout for establishing syn */  end
+  end
+end
+
+
 if $DEBUG
   require 'pp'
 end
@@ -60,7 +83,7 @@ module RStomp
       :client_id => nil,
       :logfile => STDERR,
       :logger => nil,
-      }
+    }
 
     # make them attributes
     DEFAULT_OPTIONS.each do |key, value|
@@ -123,7 +146,7 @@ module RStomp
         headers = {
           :user => @user,
           :password => @password
-          }
+        }
         headers['client-id'] = @client_id unless @client_id.nil?
         # logger.debug "headers = #{headers.inspect} client_id = #{ @client_id }"
         while s.nil? or @failure != nil
@@ -134,6 +157,59 @@ module RStomp
 
             s = TCPSocket.open(@current_host, @current_port)
 
+            # use keepalive to detect dead connections (see http://tldp.org/HOWTO/TCP-Keepalive-HOWTO/)
+            s.setsockopt(Socket::SOL_SOCKET, Socket::SO_KEEPALIVE, true)
+
+            case RUBY_PLATFORM
+            when /linux/
+              # note: if using OpenSSL, you may need to do this:
+              #   ssl_socket.to_io.setsockopt(Socket::SOL_SOCKET, Socket::SO_KEEPALIVE, true)
+              # see http://www.lerfjhax.com/articles/2006/08/22/ruby-ssl-setsockopt
+
+              # defaults
+              # $ cat /proc/sys/net/ipv4/tcp_keepalive_time 
+              # 7200
+              # $ cat /proc/sys/net/ipv4/tcp_keepalive_intvl 
+              # 75
+              # $ cat /proc/sys/net/ipv4/tcp_keepalive_probes 
+              # 9
+
+              # these values should all be configurable (but with sensible defaults)
+
+              # the interval between the last data packet sent (simple
+              # ACKs are not considered data) and the first keepalive
+              # probe; after the connection is marked to need
+              # keepalive, this counter is not used any further
+              s.setsockopt(Socket::IPPROTO_TCP, SocketExtensions::Linux::TCP_KEEPIDLE, 20)
+              # the interval between subsequential keepalive probes,
+              # regardless of what the connection has exchanged in the
+              # meantime
+              s.setsockopt(Socket::IPPROTO_TCP, SocketExtensions::Linux::TCP_KEEPINTVL, 10)
+              # the number of unacknowledged probes to send before
+              # considering the connection dead and notifying the
+              # application layer
+              
+              # NOTE: I did not see any effect from setting this
+              # option
+              s.setsockopt(Socket::IPPROTO_TCP, SocketExtensions::Linux::TCP_KEEPCNT, 6)
+            when /darwin/
+              # this works, with value = 100 actually takes 12 minutes
+              # 55 secs to time out (with opt = 100); with value = 10,
+              # takes 685 seconds
+              
+              # ttl = KEEPIDLE + (9 * 75) - cannot change INTVL and
+              # CNT per socket on Darwin
+              
+              # set KEEPIDLE time (in seconds) - wait one minute
+              # before sending KEEPALIVE packet (for testing - use
+              # more realistic figure for real)
+              p [:setting_keepalive]
+              opt = [60].pack('l')
+              s.setsockopt(Socket::IPPROTO_TCP, SocketExtensions::Darwin::TCP_KEEPALIVE, opt)
+            when /jruby/
+            else
+            end
+
             _transmit(s, "CONNECT", headers)
             @connect = _receive(s)
             @open = true
@@ -142,7 +218,7 @@ module RStomp
             @subscriptions.each { |k, v| _transmit(s, "SUBSCRIBE", v) }
           rescue Interrupt => e
             #p [:interrupt, e]
-#          rescue Exception => e
+            #          rescue Exception => e
           rescue RStompException, SystemCallError => e
             #p [:Exception, e]
             @failure = e
@@ -287,8 +363,8 @@ module RStomp
           s = socket
           rv = _receive(s)
           return rv
-#        rescue Interrupt
-#          raise
+          #        rescue Interrupt
+          #          raise
         rescue RStompException, SystemCallError => e
           @failure = e
           handle_error ReceiveError, "receive failed: #{e.message}"
@@ -370,8 +446,8 @@ module RStomp
         begin
           _transmit(socket, command, headers, body)
           return
-#        rescue Interrupt
-#          raise
+          #        rescue Interrupt
+          #          raise
         rescue RStompException, SystemCallError => e
           @failure = e
           handle_error TransmitError, "transmit '#{command}' failed: #{e.message} (#{body})"
@@ -455,13 +531,13 @@ module RStomp
           break if message.nil?
           case message.command
           when 'MESSAGE':
-            if listener = @listeners[message.headers['destination']]
-              listener.call(message)
-            end
+              if listener = @listeners[message.headers['destination']]
+                listener.call(message)
+              end
           when 'RECEIPT':
-            if listener = @receipt_listeners[message.headers['receipt-id']]
-              listener.call(message)
-            end
+              if listener = @receipt_listeners[message.headers['receipt-id']]
+                listener.call(message)
+              end
           end
         end
       end
