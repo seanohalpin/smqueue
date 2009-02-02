@@ -2,21 +2,85 @@ require 'rstomp'
 module SMQueue
   class StompAdapter < Adapter
     class Configuration < AdapterConfiguration
-      has :host, :kind => String, :default => ""
-      has :port, :kind => Integer, :default => 61613  # Stomp
+      has :host, :kind => String, :default => "" do
+        doc <<-EDOC
+          The host that runs the broker you want to connect to.
+        EDOC
+      end
+      has :port, :kind => Integer, :default => 61613 do
+        doc <<-EDOC
+          The host that your broker is talking STOMP on.
+          
+          The default port for STOMP is 61613.
+        EDOC
+      end
+      # TODO: document
+	
       has :secondary_host, :kind => String, :default => ""
       has :secondary_port, :kind => Integer, :default => 61613
+      # TODO: Find out how this is used
       has :name, :kind => String, :default => ""
-      has :user, :kind => String, :default => ""
-      has :password, :kind => String, :default => ""
+      has :user, :kind => String, :default => "" do
+        doc <<-EDOC
+          The user to attempt to authenticate at the broker with.
+          
+          If your broker isn't setup for authentication just leave this blank.
+        EDOC
+      end
+      has :password, :kind => String, :default => "" do
+        doc <<-EDOC
+          The password to attempt to authenticate at the broker with.
+          
+          If your broker isn't setup for authentication just leave this blank.
+        EDOC
+      end
+      # TODO: I think that reliable means the connection will be reconnected 
+      # after a disconnect. Find out if that's the case and document it.
       has :reliable, :default => false
+      # TODO: document this
+      # TODO: I think that persistent means that the message will be stored by
+      # the broker on a PUT before it sends an ACK.
       has :persistent, :default => true
-      has :reconnect_delay, :default => 5
-      has :client_id, :default => nil, :kind => String
-      has :logfile, :default => STDERR
-      has :logger, :default => nil
-      has :subscription_name, :default => nil
-      has :home, :default => File.dirname(File.expand_path(__FILE__))
+      has :reconnect_delay, :default => 5 do
+        doc <<-EDOC
+          How long (in seconds) should we wait between connection attempts?
+          
+          Default: 5 seconds.
+        EDOC
+      end
+      has :client_id, :default => nil, :kind => String do
+        doc <<-EDOC
+          A string used to identify this script to the broken.
+        EDOC
+      end
+      has :logfile, :default => STDERR do
+        doc <<-EDOC
+          Where should we log to?
+          
+          Default: STDERR.
+        EDOC
+      end
+      has :logger, :default => nil do
+        doc <<-EDOC
+          A logger that's to log with. If this is left out of the options a 
+          new Logger is built that talks to the logfile.
+        EDOC
+      end
+      has :subscription_name, :default => nil do
+        doc <<-EDOC
+          The subscription to consume from on the broker.
+          
+          This is only used by message consumers. It doesn't make much sense
+          for message producers.
+        EDOC
+      end
+      has :home, :default => File.dirname(File.expand_path(__FILE__)) do
+        doc <<-EDOC
+          A directory to store state in.
+          
+          Defaults to the directory this script is in.
+        EDOC
+      end
       has :single_delivery, :default => false do
         doc <<-EDOC
           Note: we can't guarantee single delivery - only best effort.
