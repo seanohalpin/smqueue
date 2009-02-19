@@ -1,0 +1,20 @@
+--- !ditz.rubyforge.org,2008-03-06/project 
+name: smqueue
+version: "0.5"
+components: 
+- !ditz.rubyforge.org,2008-03-06/component 
+  name: smqueue
+- !ditz.rubyforge.org,2008-03-06/component 
+  name: core
+- !ditz.rubyforge.org,2008-03-06/component 
+  name: stomp
+releases: 
+- !ditz.rubyforge.org,2008-03-06/release 
+  name: 0.3.0
+  status: :unreleased
+  release_time: 
+  log_events: 
+  - - 2009-02-19 00:14:36.653711 Z
+    - Sean O'Halpin <sean.ohalpin@gmail.com>
+    - created
+    - ""
