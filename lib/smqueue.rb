@@ -8,7 +8,7 @@
 # - SMQueue(config).get(headers = {}) do |msg|
 #   end
 # todo - [X] add :durable option (and fail if no client_id specified)
-# todo - [ ] gemify - use Mr Bones
+# todo - [x] gemify - use Mr Bones
 # todo - [ ] change to class (so can be subclassed) - so you're working with an SMQueue instance
 # todo - [ ] write protocol (open, close, put, get) in SMQueue (so don't have to do it in adaptors)
 # todo - [ ] simplify StompAdapter (get rid of sent_messages stuff)
@@ -19,17 +19,6 @@ require 'rubygems'
 require 'doodle'
 require 'doodle/version'
 require 'yaml'
-
-class Doodle
-  if Doodle::VERSION::STRING < '0.1.9'
-    def to_hash
-      doodle.attributes.inject({}) {|hash, (name, attribute)| hash[name] = send(name); hash}
-    end
-    class DoodleAttribute
-      has :doc, :kind => String
-    end
-  end
-end
 
 #class SMQueue < Doodle
 module SMQueue
@@ -77,8 +66,8 @@ module SMQueue
   end
 
   # end Bones boilerplate
-  
-  class << self
+
+  module ClassMethods
     def dbg(*args, &block)
       if $DEBUG
         if args.size > 0
@@ -96,12 +85,14 @@ module SMQueue
     def calc_expiry_time(seconds = 86400 * 7) # one week
       ((Time.now.utc + seconds).to_f * 1000).to_i
     end
-    
+
     # resolve a string representing a classname
     def const_resolve(constant)
-      constant.to_s.split(/::/).reject{|x| x.empty?}.inject(self) { |prev, this| prev.const_get(this) }
+      Doodle::Utils.const_resolve(constant)
+      #constant.to_s.split(/::/).reject{|x| x.empty?}.inject(self) { |prev, this| prev.const_get(this) }
     end
   end
+  extend ClassMethods
 
   class AdapterConfiguration < Doodle
     has :logger, :default => nil
@@ -131,6 +122,16 @@ module SMQueue
         SMQueue.const_resolve(s.to_s)
       end
     end
+
+    def self.create(options)
+      # TODO: make the AdapterConfiguration a factory class so it's
+      # responsible for handling klass.new, e.g. so can decide which
+      # class, whether to return existing instance, etc.
+      ac = AdapterConfiguration.new(:adapter_class => options[:adapter_class])
+      klass = ac.adapter_class
+      klass.new(:configuration => options[:configuration])
+    end
+
   end
 
   class Adapter < Doodle
@@ -159,13 +160,7 @@ module SMQueue
       configuration = configuration.dup
       adapter = configuration.delete(:adapter)
       #p [:adapter, adapter]
-      ac = AdapterConfiguration.new(:adapter_class => adapter)
-      #p [:ac, ac]
-      klass = ac.adapter_class
-      #p [:class, klass]
-      #puts [:configuration, configuration].pretty_inspect
-#      klass.new(:configuration => configuration)
-      klass.new(:configuration => configuration)
+      AdapterConfiguration.create(:configuration => configuration, :adapter_class => adapter)
     end
   end
 
@@ -178,7 +173,7 @@ module SMQueue
     has :headers, :default => { }
     has :body
   end
-  
+
   class << self
     def new(*args, &block)
       a = args.first
@@ -202,6 +197,7 @@ end
   adapter_path = File.join(base_path, 'smqueue', 'adapters', '*.rb')
   Dir[adapter_path].each do |file|
     begin
+      #puts "requiring #{file}"
       require file
     rescue Object => e
       warn "warning: could not load adapter '#{file}'. Reason: #{e}"

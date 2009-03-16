@@ -113,7 +113,7 @@ module RStomp
       @port = params[:port]
       @secondary_host = params[:secondary_host]
       @secondary_port = params[:secondary_port]
-      
+
       @current_host = @host
       @current_port = @port
 
@@ -167,11 +167,11 @@ module RStomp
               # see http://www.lerfjhax.com/articles/2006/08/22/ruby-ssl-setsockopt
 
               # defaults
-              # $ cat /proc/sys/net/ipv4/tcp_keepalive_time 
+              # $ cat /proc/sys/net/ipv4/tcp_keepalive_time
               # 7200
-              # $ cat /proc/sys/net/ipv4/tcp_keepalive_intvl 
+              # $ cat /proc/sys/net/ipv4/tcp_keepalive_intvl
               # 75
-              # $ cat /proc/sys/net/ipv4/tcp_keepalive_probes 
+              # $ cat /proc/sys/net/ipv4/tcp_keepalive_probes
               # 9
 
               # these values should all be configurable (but with sensible defaults)
@@ -188,7 +188,7 @@ module RStomp
               # the number of unacknowledged probes to send before
               # considering the connection dead and notifying the
               # application layer
-              
+
               # NOTE: I did not see any effect from setting this
               # option
               s.setsockopt(Socket::IPPROTO_TCP, SocketExtensions::Linux::TCP_KEEPCNT, 6)
@@ -196,10 +196,10 @@ module RStomp
               # this works, with value = 100 actually takes 12 minutes
               # 55 secs to time out (with opt = 100); with value = 10,
               # takes 685 seconds
-              
+
               # ttl = KEEPIDLE + (9 * 75) - cannot change INTVL and
               # CNT per socket on Darwin
-              
+
               # set KEEPIDLE time (in seconds) - wait one minute
               # before sending KEEPALIVE packet (for testing - use
               # more realistic figure for real)
@@ -239,7 +239,7 @@ module RStomp
         @socket = s
       end
     end
-    
+
     def switch_host_and_port
       # Try connecting to the slave instead
       # Or if the slave goes down, connect back to the master
@@ -530,14 +530,14 @@ module RStomp
           message = @connection.receive
           break if message.nil?
           case message.command
-          when 'MESSAGE':
-              if listener = @listeners[message.headers['destination']]
-                listener.call(message)
-              end
-          when 'RECEIPT':
-              if listener = @receipt_listeners[message.headers['receipt-id']]
-                listener.call(message)
-              end
+          when 'MESSAGE'
+            if listener = @listeners[message.headers['destination']]
+              listener.call(message)
+            end
+          when 'RECEIPT'
+            if listener = @receipt_listeners[message.headers['receipt-id']]
+              listener.call(message)
+            end
           end
         end
       end
