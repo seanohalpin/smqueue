@@ -5,7 +5,7 @@ module SMQueue
     QUEUES = { }
     class Configuration < AdapterConfiguration
       def initialize(*args, &block)
-        p [self.class, args]
+        #p [self.class, args]
         super
       end
       has :name, :kind => String  do
@@ -29,7 +29,7 @@ module SMQueue
     end
 
     doc "in memory threadsafe queue"
-    has :queue do
+    has :thread_queue do
       doc "internal ref to thread-safe Queue"
       init { Queue.new }
     end
@@ -40,15 +40,15 @@ module SMQueue
     end
 
     def put(*args, &block)
-      p [:tput, args]
-      queue.enq(*args)
+      #p [:tput, args]
+      thread_queue.enq(*args)
     end
 
     def get(*args, &block)
-      p [:tget]
+      #p [:tget]
       loop do
-        p [:tget, :loop]
-        input = queue.deq
+        #p [:tget, :loop]
+        input = thread_queue.deq
         msg = SMQueue::Message.new(:body => input)
         yield(msg)
       end
