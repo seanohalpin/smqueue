@@ -1,0 +1,18 @@
+--- !ditz.rubyforge.org,2008-03-06/issue 
+title: use ActiveMQ standard failover uri specification
+desc: ""
+type: :task
+component: stomp
+release: 0.3.0
+reporter: Sean O'Halpin <sean.ohalpin@gmail.com>
+status: :unstarted
+disposition: 
+creation_time: 2009-03-16 23:10:12.050158 Z
+references: []
+
+id: cfd48e50688db53bc82766892f3dfdb00282f4db
+log_events: 
+- - 2009-03-16 23:10:12.730016 Z
+  - Sean O'Halpin <sean.ohalpin@gmail.com>
+  - created
+  - ""

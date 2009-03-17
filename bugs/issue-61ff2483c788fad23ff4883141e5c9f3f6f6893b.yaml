@@ -1,0 +1,18 @@
+--- !ditz.rubyforge.org,2008-03-06/issue 
+title: Load adapters on demand rather than at library load
+desc: At the moment, all adapters are loaded when smqueue is loaded. Should only load those adapters required by the program.
+type: :task
+component: adapters
+release: 0.3.0
+reporter: Sean O'Halpin <sean.ohalpin@gmail.com>
+status: :unstarted
+disposition: 
+creation_time: 2009-03-16 23:15:55.824355 Z
+references: []
+
+id: 61ff2483c788fad23ff4883141e5c9f3f6f6893b
+log_events: 
+- - 2009-03-16 23:15:56.487787 Z
+  - Sean O'Halpin <sean.ohalpin@gmail.com>
+  - created
+  - ""

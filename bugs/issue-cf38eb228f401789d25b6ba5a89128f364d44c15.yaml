@@ -1,0 +1,18 @@
+--- !ditz.rubyforge.org,2008-03-06/issue 
+title: configurable filter chains
+desc: e.g. from_yaml, from_xml
+type: :feature
+component: core
+release: 0.3.0
+reporter: Sean O'Halpin <sean.ohalpin@gmail.com>
+status: :unstarted
+disposition: 
+creation_time: 2009-03-16 23:08:30.970076 Z
+references: []
+
+id: cf38eb228f401789d25b6ba5a89128f364d44c15
+log_events: 
+- - 2009-03-16 23:08:31.825920 Z
+  - Sean O'Halpin <sean.ohalpin@gmail.com>
+  - created
+  - ""

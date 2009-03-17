@@ -1,0 +1,18 @@
+--- !ditz.rubyforge.org,2008-03-06/issue 
+title: auto-discovery of brokers
+desc: "eg by mDNS / multicast \xE2\x80\x93 much like the default setup for an ActiveMQ broker"
+type: :feature
+component: adapters
+release: 0.3.0
+reporter: Sean O'Halpin <sean.ohalpin@gmail.com>
+status: :unstarted
+disposition: 
+creation_time: 2009-03-16 23:04:50.999700 Z
+references: []
+
+id: 055d33e9ec39d121b27daeb789d272c2fbdf5538
+log_events: 
+- - 2009-03-16 23:04:52.255677 Z
+  - Sean O'Halpin <sean.ohalpin@gmail.com>
+  - created
+  - ""

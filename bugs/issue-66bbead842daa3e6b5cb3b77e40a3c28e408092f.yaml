@@ -1,0 +1,20 @@
+--- !ditz.rubyforge.org,2008-03-06/issue 
+title: separate protocol from transport level
+desc: "There are two reasons for considering this: one is to re-use transport layers for different protocols and vice versa and the other is to manage error handling better.\n\n\
+  For example, STOMP is a protocol, tcp/ip is a transport. You could do STOMP via the filesystem or by HTTP, SMTP, etc. or by pigeon post. At the moment, the STOMP adapter conflates protocol and transport. Ideally, you\xE2\x80\x99d have a protocol handler that didn\xE2\x80\x99t know anything about the actual transport and a transport layer that knew nothing and could care less about the protocol layer.\n\
+  Note that STOMP over HTTP is an example of one protocol being implemented in terms of another protocol being used as a transport layer."
+type: :task
+component: core
+release: 0.3.0
+reporter: Sean O'Halpin <sean.ohalpin@gmail.com>
+status: :unstarted
+disposition: 
+creation_time: 2009-03-16 23:06:14.551773 Z
+references: []
+
+id: 66bbead842daa3e6b5cb3b77e40a3c28e408092f
+log_events: 
+- - 2009-03-16 23:06:15.207385 Z
+  - Sean O'Halpin <sean.ohalpin@gmail.com>
+  - created
+  - ""

@@ -1,7 +1,7 @@
 mq: &default_mq
   :adapter: StompAdapter
-#  :host: localhost
-  :host: 192.168.53.134
+  :host: localhost
+#  :host: 192.168.53.134
   :port: 61613
   :reconnect_delay: 5
 

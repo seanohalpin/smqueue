@@ -1,0 +1,18 @@
+--- !ditz.rubyforge.org,2008-03-06/issue 
+title: ActiveMQ style URIS
+desc: e.g. for failover and stomp+ssl
+type: :feature
+component: adapters
+release: 0.3.0
+reporter: Sean O'Halpin <sean.ohalpin@gmail.com>
+status: :unstarted
+disposition: 
+creation_time: 2009-03-16 23:04:06.008629 Z
+references: []
+
+id: 83ea9968ce55ecea5a9bb3d7ebb9ae447a193ad2
+log_events: 
+- - 2009-03-16 23:04:06.703436 Z
+  - Sean O'Halpin <sean.ohalpin@gmail.com>
+  - created
+  - ""

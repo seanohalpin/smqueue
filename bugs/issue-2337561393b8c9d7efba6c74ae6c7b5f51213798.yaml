@@ -1,0 +1,18 @@
+--- !ditz.rubyforge.org,2008-03-06/issue 
+title: make KEEPALIVE configurable
+desc: applies to all adapters which block in read on tcp/ip connection
+type: :task
+component: adapters
+release: 0.3.0
+reporter: Sean O'Halpin <sean.ohalpin@gmail.com>
+status: :unstarted
+disposition: 
+creation_time: 2009-03-17 00:45:35.663738 Z
+references: []
+
+id: 2337561393b8c9d7efba6c74ae6c7b5f51213798
+log_events: 
+- - 2009-03-17 00:45:36.751598 Z
+  - Sean O'Halpin <sean.ohalpin@gmail.com>
+  - created
+  - ""

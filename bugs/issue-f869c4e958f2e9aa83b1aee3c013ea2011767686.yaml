@@ -1,0 +1,18 @@
+--- !ditz.rubyforge.org,2008-03-06/issue 
+title: Move logging into core SMQueue class
+desc: ""
+type: :task
+component: core
+release: 0.3.0
+reporter: Sean O'Halpin <sean.ohalpin@gmail.com>
+status: :unstarted
+disposition: 
+creation_time: 2009-03-16 23:16:25.952156 Z
+references: []
+
+id: f869c4e958f2e9aa83b1aee3c013ea2011767686
+log_events: 
+- - 2009-03-16 23:16:26.319787 Z
+  - Sean O'Halpin <sean.ohalpin@gmail.com>
+  - created
+  - ""

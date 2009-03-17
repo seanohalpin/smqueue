@@ -1,0 +1,18 @@
+--- !ditz.rubyforge.org,2008-03-06/issue 
+title: implement adapters for more protocols
+desc: e.g. AMQP (rabbitmq) and Websphere
+type: :task
+component: adapters
+release: 0.3.0
+reporter: Sean O'Halpin <sean.ohalpin@gmail.com>
+status: :unstarted
+disposition: 
+creation_time: 2009-03-16 23:06:54.752087 Z
+references: []
+
+id: fcf3c21ae1e9bd90db1f031c53a5aee2424cfee1
+log_events: 
+- - 2009-03-16 23:06:55.527556 Z
+  - Sean O'Halpin <sean.ohalpin@gmail.com>
+  - created
+  - ""
