@@ -1,0 +1,4 @@
+<div class="logo">
+  <span class="title-text">smqueue</span>
+  <span style="vertical-align: 20%;"><em>&nbsp;&nbsp;simple message queue</em></span>
+</div>

@@ -1,0 +1,176 @@
+---
+title:       using the Stomp connector with Apache ActiveMQ
+author:      Sean O'Halpin
+created_at:  2009-03-16 23:59:09
+filter:
+  - erb
+  - wikilinks
+  - creole
+---
+== <%= @page.title %>
+
+=== installing ActiveMQ
+
+This assumes Apache Activemq 5.2.0 and mysql.
+
+* Download [[http://activemq.apache.org/|ActiveMQ]]
+* Unpack it into a directory (which we'll refer to as {{{$ACTIVEMQ_HOME}}}):
+$ tar zxvf apache-activemq-5.2.0-bin.tar.gz
+* Download the mysql java connector from http://dev.mysql.com/downloads/connector/j/
+* Untar
+$ tar zxvf mysql-connector-java-5.1.7.tar.gz
+* Copy the mysql java connector into the {{{$ACTIVEMQ_HOME/lib/optional directory}}}
+$ cp mysql-connector-java-5.1.7/mysql-connector-java-5.1.7-bin.jar $ACTIVEMQ_HOME/lib/optional/
+
+=== running ActiveMQ
+
+Start up activemq:
+$ ./apache-activemq-5.2.0/bin/activemq xbean:./apache-activemq-5.2.0/conf/mysql-activemq.xml
+
+where {{{mysql-activemq.xml}}} looks like this:
+
+<<< source lang: xml
+<beans
+  xmlns="http://www.springframework.org/schema/beans"
+  xmlns:amq="http://activemq.org/config/1.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+  http://activemq.org/config/1.0 http://activemq.apache.org/schema/activemq-core.xsd
+  http://activemq.apache.org/camel/schema/spring http://activemq.apache.org/camel/schema/spring/camel-spring.xsd">
+
+  <!-- Allows us to use system properties as variables in this configuration file -->
+  <bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer"/>
+
+  <broker xmlns="http://activemq.org/config/1.0" brokerName="localhost" dataDirectory="${activemq.base}/data">
+
+    <!-- The transport connectors ActiveMQ will listen to -->
+    <transportConnectors>
+       <transportConnector name="openwire" uri="tcp://localhost:61616" discoveryUri="multicast://default"/>
+       <transportConnector name="ssl" uri="ssl://localhost:61617"/>
+       <transportConnector name="stomp" uri="stomp://localhost:61613"/>
+       <transportConnector name="xmpp" uri="xmpp://localhost:61222"/>
+    </transportConnectors>
+
+    <!-- The store and forward broker networks ActiveMQ will listen to -->
+    <networkConnectors>
+      <!-- by default just auto discover the other brokers -->
+      <!--
+      <networkConnector name="default-nc" uri="multicast://default"/>
+      -->
+    </networkConnectors>
+
+    <!-- Use the following if you wish to configure the journal with JDBC -->
+    <persistenceAdapter>
+        <journaledJDBC journalLogFiles="5" dataDirectory="${activemq.base}/activemq-data" dataSource="#mysql-ds"/>
+    </persistenceAdapter>
+
+    <!-- Or if you want to use pure JDBC without a journal -->
+    <!--
+    <persistenceAdapter>
+        <jdbcPersistenceAdapter dataSource="#mysql-ds"/>
+    </persistenceAdapter>
+    -->
+
+    <!-- Use the following to configure how ActiveMQ is exposed in JMX
+    <managementContext>
+       <managementContext connectorPort="1099" jmxDomainName="org.apache.activemq"/>
+    </managementContext>
+    -->
+
+  </broker>
+
+  <!-- lets create a command agent to respond to message based admin commands on the ActiveMQ.Agent topic -->
+  <commandAgent xmlns="http://activemq.org/config/1.0"/>
+
+  <!-- An embedded servlet engine for serving up the Admin console -->
+  <jetty xmlns="http://mortbay.com/schemas/jetty/1.0">
+    <connectors>
+      <nioConnector port="8161" />
+    </connectors>
+
+    <handlers>
+      <webAppContext contextPath="/admin" resourceBase="${activemq.base}/webapps/admin" logUrlOnStart="true" />
+    </handlers>
+  </jetty>
+
+  <!-- MySql DataSource Sample Setup -->
+  <bean id="mysql-ds" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+    <property name="driverClassName" value="com.mysql.jdbc.Driver"/>
+    <property name="url" value="jdbc:mysql://localhost/activemq?relaxAutoCommit=true"/>
+    <property name="username" value="activemq"/>
+    <property name="password" value="activemq"/>
+    <property name="maxActive" value="200"/>
+    <property name="poolPreparedStatements" value="true"/>
+  </bean>
+
+</beans>
+
+>>>
+
+== testing the Stomp connector
+
+To test, use the {{{input.rb}}} and {{{output.rb}}} files from the {{{smqueue/examples}}} directory.
+
+Make sure that the {{{smqueue/examples/config/example_config.yml}}} file contains the following entries:
+
+<<< source lang: yaml
+mq: &default_mq
+  :adapter: StompAdapter
+  :host: localhost
+  :port: 61613
+  :reconnect_delay: 5
+
+:input:
+  <<: *default_mq
+  :name: /queue/shared
+  :reliable: true
+
+:output:
+  <<: *default_mq
+  :name: /queue/shared
+  :reliable: true
+
+:readline:
+  :adapter: ReadlineAdapter
+
+:stdio:
+  :adapter: StdioAdapter
+
+:error:
+  :adapter: NullAdapter
+>>>
+
+In one terminal, start the {{{input.rb}}} script:
+
+$ ruby examples/input.rb
+
+In another terminal window, start the {{{output.rb}}} script:
+
+$ ruby examples/output.rb
+
+At the {{{>}}} prompt, type your message:
+
+<<< source lang: shell
+> Hello World
+>
+>>>
+
+In the other terminal window, you should see output like the following:
+
+<<< source lang: shell
+#<RStomp::Message:0x11d206c
+ @body="Hello World",
+ @command="MESSAGE",
+ @headers=
+  {"timestamp"=>"1237249941260",
+   "message-id"=>"ID:mc-s001853.lan-55828-1237249215635-4:1:-1:1:1",
+   "expires"=>"1237854741256",
+   "content-type"=>"text/plain; charset=UTF-8",
+   "destination"=>"/queue/shared",
+   "priority"=>"0",
+   "content-length"=>"11",
+   "ack"=>"auto"}>
+----------------------------------------
+Hello World
+----------------------------------------
+>>>

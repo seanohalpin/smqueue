@@ -1,0 +1,82 @@
+  Official Markup
+
+ Here is a summary of the official Creole 1.0 markup
+ elements.  See http://www.wikicreole.org for the full
+ details.
+
+ Headings:
+ = heading 1       ->    <h1>heading 1</h1>
+ == heading 2      ->    <h2>heading 2</h2>
+ ...
+ ====== heading 6  ->    <h6>heading 6</h6>
+
+ Various inline markup:
+ ** bold **        ->    <strong> bold </strong>
+ // italics //     ->    <em> italics </em>
+ **// both //**    ->    <strong><em> both </em></strong>
+ [[ link ]]        ->    <a href="link">link</a>
+ [[ link | text ]] ->    <a href="link">text</a>
+ http://cpan.org   ->    <a href="http://cpan.org">http://cpan.org</a>
+ line \\ break     ->    line <br /> break
+ {{img.jpg|alt}}   ->    <img src="img.jpg" alt="alt">
+
+ Lists:
+ * unordered list        <ul><li>unordered list</li>
+ * second item               <li>second item</li>
+ ## nested ordered  ->       <ol><li>nested ordered</li>
+ *** uber-nested                 <ul><li>uber-nested</li></ul>
+ * back to level 1           </ol><li>back to level 1</li></ul>
+
+ Tables:
+ |= h1 |= h2       ->    <table><tr><th>h1</th><th>h2</th></tr>
+ |  c1 |  c2             <tr><td>c1</td><td>c2</td></tr></table>
+
+ Nowiki (Preformatted):
+ {{{                     <pre>
+   ** not bold **          ** not bold **
+   escaped HTML:   ->      escaped HTML:
+   <i> test </i>           &lt;i&gt; test &lt;/i&gt;
+ }}}                     <pre>
+
+ {{{ inline\\also }}} -> <tt>inline\\also</tt>
+
+ Escape Character:
+ ~** not bold **    ->    ** not bold **
+ tilde: ~~          ->    tilde: ~
+
+ Paragraphs are separated by other blocks and blank lines.
+ Inline markup can usually be combined, overlapped, etc.  List
+ items and plugin text can span lines.
+
+Extended Markup
+
+ In addition to OFFICIAL MARKUP, Text::WikiCreole also supports
+ the following markup:
+
+ Plugins:
+ << plugin >>        ->    whatever you want (see WikiCreole.creole_plugin)
+ <<< plugin >>>      ->    whatever you want (see WikiCreole.creole_plugin)
+     Triple-bracket syntax has priority, in order to allow you to embed
+     double-brackets in plugins, such as to embed Perl code.
+
+ Inline:
+ ## monospace ##     ->    <tt> monospace </tt>
+ ^^ superscript ^^   ->    <sup> superscript </sup>
+ ,, subscript ,,     ->    <sub> subscript </sub>
+ __ underline __     ->    <u> underline </u>
+ (TM)                ->    &trade;
+ (R)                 ->    &reg;
+ (C)                 ->    &copy;
+ ...                 ->    &hellip;
+ --                  ->    &ndash;
+
+ Indented Paragraphs:
+ :this               ->    <div style="margin-left:2em"><p>this
+ is indented               is indented</p>
+ :: more indented          <div style="margin-left:2em"><p> more
+                           indented</div></div>
+
+ Definition Lists:
+ ; Title             ->    <dl><dt>Title</dt>
+ : item 1 : item 2         <dd>item 1</dd><dd>item 2</dd>
+ ; Title 2 : item2a        <dt>Title 2</dt><dd>item 2a</dd></dl>

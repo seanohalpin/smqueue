@@ -1,0 +1,13 @@
+---
+title:       introduction
+author:      Sean O'Halpin
+created_at:  2009-03-04 03:40:08
+filter:
+  - erb
+  - wikilinks
+  - creole
+---
+== <%= @page.title %>
+
+smqueue is a library for making it easy to create processes which communicate over a variety of message queues.
+
