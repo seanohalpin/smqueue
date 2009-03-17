@@ -130,7 +130,7 @@ module SMQueue
       # class, whether to return existing instance, etc.
       ac = AdapterConfiguration.new(:adapter_class => options[:adapter_class])
       klass = ac.adapter_class
-      p [:klass, klass]
+      #p [:klass, klass]
       klass.new(:configuration => options[:configuration])
     end
 
