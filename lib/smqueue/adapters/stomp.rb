@@ -10,12 +10,12 @@ module SMQueue
       has :port, :kind => Integer, :default => 61613 do
         doc <<-EDOC
           The host that your broker is talking STOMP on.
-          
+
           The default port for STOMP is 61613.
         EDOC
       end
       # TODO: document
-	
+
       has :secondary_host, :kind => String, :default => ""
       has :secondary_port, :kind => Integer, :default => 61613
       # TODO: Find out how this is used
@@ -23,18 +23,18 @@ module SMQueue
       has :user, :kind => String, :default => "" do
         doc <<-EDOC
           The user to attempt to authenticate at the broker with.
-          
+
           If your broker isn't setup for authentication just leave this blank.
         EDOC
       end
       has :password, :kind => String, :default => "" do
         doc <<-EDOC
           The password to attempt to authenticate at the broker with.
-          
+
           If your broker isn't setup for authentication just leave this blank.
         EDOC
       end
-      # TODO: I think that reliable means the connection will be reconnected 
+      # TODO: I think that reliable means the connection will be reconnected
       # after a disconnect. Find out if that's the case and document it.
       has :reliable, :default => false
       # TODO: document this
@@ -44,7 +44,7 @@ module SMQueue
       has :reconnect_delay, :default => 5 do
         doc <<-EDOC
           How long (in seconds) should we wait between connection attempts?
-          
+
           Default: 5 seconds.
         EDOC
       end
@@ -56,20 +56,20 @@ module SMQueue
       has :logfile, :default => STDERR do
         doc <<-EDOC
           Where should we log to?
-          
+
           Default: STDERR.
         EDOC
       end
       has :logger, :default => nil do
         doc <<-EDOC
-          A logger that's to log with. If this is left out of the options a 
+          A logger that's to log with. If this is left out of the options a
           new Logger is built that talks to the logfile.
         EDOC
       end
       has :subscription_name, :default => nil do
         doc <<-EDOC
           The subscription to consume from on the broker.
-          
+
           This is only used by message consumers. It doesn't make much sense
           for message producers.
         EDOC
@@ -77,7 +77,7 @@ module SMQueue
       has :home, :default => File.dirname(File.expand_path(__FILE__)) do
         doc <<-EDOC
           A directory to store state in.
-          
+
           Defaults to the directory this script is in.
         EDOC
       end
@@ -110,7 +110,7 @@ module SMQueue
         end
         doc <<-EDOC
           Specify whether you want a durable or non-durable subscription.
-      
+
           Note: durable queues are ~not~ the default as this could be
           v. expensive in disk usage when used thoughtlessly.
         EDOC
@@ -144,7 +144,7 @@ module SMQueue
 
     # connect to message broker
     def connect(*args, &block)
-      self.connection = RStomp::Connection.open(configuration.to_hash)   
+      self.connection = RStomp::Connection.open(configuration.to_hash)
       # If the connection has swapped hosts, then swap out primary and secondary
       if connection.current_host != configuration.host
         configuration.secondary_host = configuration.host
@@ -189,7 +189,7 @@ module SMQueue
         SMQueue.dbg { [:smqueue, :ack, :message_seen, message_id].inspect }
       end
     end
-    
+
     # store the remembered message ids in a yaml file
     def store_remembered_messages
       if configuration.single_delivery
@@ -222,7 +222,7 @@ module SMQueue
         self.seen_messages = buffer
       end
     end
-    
+
     # acknowledge message (if headers["ack"] == "client")
     def ack(subscription_headers, message)
       #p [:ack, message.headers["message-id"]]
@@ -246,7 +246,7 @@ module SMQueue
     #   :ack               => "client"
     #   :client_id         => configuration.client_id
     #   :subscription_name => configuration.subscription_name
-    #   
+    #
     def get(headers = {}, &block)
       self.connect
       SMQueue.dbg { [:smqueue, :get, headers].inspect }
@@ -270,7 +270,7 @@ module SMQueue
         subscription_headers["durable-subscriber-name"] = subscription_name
       end
       #p [:subscription_headers_after, subscription_headers]
-      
+
       destination = configuration.name
       SMQueue.dbg { [:smqueue, :get, :subscribing, destination, :subscription_headers, subscription_headers].inspect }
       connection.subscribe destination, subscription_headers
