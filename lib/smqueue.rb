@@ -60,7 +60,7 @@ module SMQueue
   def self.require_all_libs_relative_to( fname, dir = nil )
     dir ||= ::File.basename(fname, '.*')
     search_me = ::File.expand_path(
-        ::File.join(::File.dirname(fname), dir, '*', '*.rb'))
+                                   ::File.join(::File.dirname(fname), dir, '*', '*.rb'))
 
     Dir.glob(search_me).sort.each {|rb| require rb}
   end
@@ -88,8 +88,8 @@ module SMQueue
 
     # resolve a string representing a classname
     def const_resolve(constant)
-      Doodle::Utils.const_resolve(constant)
-      #constant.to_s.split(/::/).reject{|x| x.empty?}.inject(self) { |prev, this| prev.const_get(this) }
+      #Doodle::Utils.const_resolve(constant)
+      constant.to_s.split(/::/).reject{|x| x.empty?}.inject(self) { |prev, this| prev.const_get(this) }
     end
   end
   extend ClassMethods
@@ -97,10 +97,10 @@ module SMQueue
   class AdapterConfiguration < Doodle
     has :logger, :default => nil
 
-    # need to use custom to_yaml because YAML won't serialize classes
     def to_hash
       doodle.attributes.inject({}) {|hash, (name, attribute)| hash[name] = send(name); hash}
     end
+    # need to use custom to_yaml because YAML won't serialize classes
     def to_yaml(*opts)
       to_hash.to_yaml(*opts)
     end
@@ -115,13 +115,14 @@ module SMQueue
       # Note: use closure so this is not evaluated until after NullAdapter class has been defined
       default { NullAdapter }
     end
-    has :configuration_class, :kind => Class do
-      init { adapter_class::Configuration }
-      from String do |s|
-        #Doodle::Utils.const_resolve(s)
-        SMQueue.const_resolve(s.to_s)
-      end
-    end
+#     has :configuration_class, :kind => Class do
+#       init { adapter_class::Configuration }
+#       #init { adapter_class.const_get(:Configuration) }
+#       from String do |s|
+#         #Doodle::Utils.const_resolve(s)
+#         SMQueue.const_resolve(s.to_s)
+#       end
+#     end
 
     def self.create(options)
       # TODO: make the AdapterConfiguration a factory class so it's
@@ -129,6 +130,7 @@ module SMQueue
       # class, whether to return existing instance, etc.
       ac = AdapterConfiguration.new(:adapter_class => options[:adapter_class])
       klass = ac.adapter_class
+      p [:klass, klass]
       klass.new(:configuration => options[:configuration])
     end
 
@@ -156,7 +158,8 @@ module SMQueue
     def put(*args, &block)
     end
     def self.create(configuration)
-      # FIXME: dup config, otherwise can use it only once - prob. better way to do this
+      # FIXME: dup config, otherwise can use it only once (because
+      # delete :adapter) - prob. better way to do this
       configuration = configuration.dup
       adapter = configuration.delete(:adapter)
       #p [:adapter, adapter]
@@ -186,7 +189,7 @@ module SMQueue
 
 end
 def SMQueue(*args, &block)
- SMQueue.new(*args, &block)
+  SMQueue.new(*args, &block)
 end
 
 # SMQueue.require_all_libs_relative_to(__FILE__)
