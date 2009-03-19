@@ -137,7 +137,7 @@ module SMQueue
   end
 
   class Adapter < Doodle
-    has :configuration, :kind => AdapterConfiguration, :abstract => true do
+    has :configuration, :kind => AdapterConfiguration, :abstract => true, :default => { } do
       from Hash do |h|
         #p [:Adapter, :configuration_from_hash]
         Doodle.context.last.class::Configuration.new(h)
