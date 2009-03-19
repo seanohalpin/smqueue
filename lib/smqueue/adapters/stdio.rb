@@ -92,13 +92,22 @@ module SMQueue
     doc "uses readline to read input from prompt, creates new Message for each line of input"
     has :prompt, :default => "> "
     has :history, :default => true
+    def raw_get(*args)
+      Readline.readline(prompt, history)
+    end
     def get(*args, &block)
-      while input = Readline.readline(prompt, history)
-        msg = Message.new(:body => input)
-        if block_given?
-          yield(msg)
+      if block_given?
+        while input = raw_get
+          msg = Message.new(:body => input)
+          if block_given?
+            yield(msg)
+          end
         end
+      else
+        input = raw_get
+        msg = input ? Message.new(:body => input) : nil
       end
+      msg
     end
   end
   # life's too short...
