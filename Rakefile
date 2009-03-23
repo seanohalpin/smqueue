@@ -19,7 +19,7 @@ PROJ.authors = "Sean O'Halpin"
 PROJ.email = 'sean.ohalpin@gmail.com'
 PROJ.url = 'http://github.com/seanohalpin/smqueue'
 PROJ.version = SMQueue::VERSION
-PROJ.rubyforge.name = 'smqueue'
+PROJ.rubyforge.name = 'metaphor'
 PROJ.gem.dependencies << ["doodle", ">= 0.1.9"]
 
 PROJ.spec.opts << '--color'
