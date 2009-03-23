@@ -137,6 +137,62 @@ module RStomp
       socket
     end
 
+    # set default TCP_KEEPALIVE option to prevent waiting forever on
+    # half-open connection after server crash
+    def socket_set_keepalive(s)
+      # use keepalive to detect dead connections (see http://tldp.org/HOWTO/TCP-Keepalive-HOWTO/)
+      s.setsockopt(Socket::SOL_SOCKET, Socket::SO_KEEPALIVE, true)
+
+      case RUBY_PLATFORM
+      when /linux/
+        # note: if using OpenSSL, you may need to do this:
+        #   ssl_socket.to_io.setsockopt(Socket::SOL_SOCKET, Socket::SO_KEEPALIVE, true)
+        # see http://www.lerfjhax.com/articles/2006/08/22/ruby-ssl-setsockopt
+
+        # defaults
+        # $ cat /proc/sys/net/ipv4/tcp_keepalive_time
+        # 7200
+        # $ cat /proc/sys/net/ipv4/tcp_keepalive_intvl
+        # 75
+        # $ cat /proc/sys/net/ipv4/tcp_keepalive_probes
+        # 9
+
+        # these values should all be configurable (but with sensible defaults)
+
+        # TCP_KEEPIDLE: the interval between the last data packet sent (simple
+        # ACKs are not considered data) and the first keepalive
+        # probe; after the connection is marked to need
+        # keepalive, this counter is not used any further
+        s.setsockopt(Socket::IPPROTO_TCP, SocketExtensions::Linux::TCP_KEEPIDLE, 20)
+        # TCP_KEEPINTVL: the interval between subsequential keepalive probes,
+        # regardless of what the connection has exchanged in the
+        # meantime
+        s.setsockopt(Socket::IPPROTO_TCP, SocketExtensions::Linux::TCP_KEEPINTVL, 10)
+        # TCP_KEEPCNT: the number of unacknowledged probes to send before
+        # considering the connection dead and notifying the
+        # application layer
+        #
+        # NOTE: I did not see any effect from setting this
+        # option
+        s.setsockopt(Socket::IPPROTO_TCP, SocketExtensions::Linux::TCP_KEEPCNT, 6)
+      when /darwin/
+        # this works, with value = 100 actually takes 12 minutes
+        # 55 secs to time out (with opt = 100); with value = 10,
+        # takes 685 seconds
+
+        # ttl = KEEPIDLE + (9 * 75) - cannot change INTVL and
+        # CNT per socket on Darwin
+
+        # TCP_KEEPALIVE: set KEEPIDLE time (in seconds) - wait
+        # one minute before sending KEEPALIVE packet
+        opt = [60].pack('l')
+        s.setsockopt(Socket::IPPROTO_TCP, SocketExtensions::Darwin::TCP_KEEPALIVE, opt)
+      when /jruby/
+      else
+      end
+      s
+    end
+
     def socket
       # Need to look into why the following synchronize does not work. (SOH: fixed)
       # SOH: Causes Exception ThreadError 'stopping only thread note: use sleep to stop forever' at 235
@@ -156,59 +212,7 @@ module RStomp
             @failure = nil
 
             s = TCPSocket.open(@current_host, @current_port)
-
-            # use keepalive to detect dead connections (see http://tldp.org/HOWTO/TCP-Keepalive-HOWTO/)
-            s.setsockopt(Socket::SOL_SOCKET, Socket::SO_KEEPALIVE, true)
-
-            case RUBY_PLATFORM
-            when /linux/
-              # note: if using OpenSSL, you may need to do this:
-              #   ssl_socket.to_io.setsockopt(Socket::SOL_SOCKET, Socket::SO_KEEPALIVE, true)
-              # see http://www.lerfjhax.com/articles/2006/08/22/ruby-ssl-setsockopt
-
-              # defaults
-              # $ cat /proc/sys/net/ipv4/tcp_keepalive_time
-              # 7200
-              # $ cat /proc/sys/net/ipv4/tcp_keepalive_intvl
-              # 75
-              # $ cat /proc/sys/net/ipv4/tcp_keepalive_probes
-              # 9
-
-              # these values should all be configurable (but with sensible defaults)
-
-              # the interval between the last data packet sent (simple
-              # ACKs are not considered data) and the first keepalive
-              # probe; after the connection is marked to need
-              # keepalive, this counter is not used any further
-              s.setsockopt(Socket::IPPROTO_TCP, SocketExtensions::Linux::TCP_KEEPIDLE, 20)
-              # the interval between subsequential keepalive probes,
-              # regardless of what the connection has exchanged in the
-              # meantime
-              s.setsockopt(Socket::IPPROTO_TCP, SocketExtensions::Linux::TCP_KEEPINTVL, 10)
-              # the number of unacknowledged probes to send before
-              # considering the connection dead and notifying the
-              # application layer
-
-              # NOTE: I did not see any effect from setting this
-              # option
-              s.setsockopt(Socket::IPPROTO_TCP, SocketExtensions::Linux::TCP_KEEPCNT, 6)
-            when /darwin/
-              # this works, with value = 100 actually takes 12 minutes
-              # 55 secs to time out (with opt = 100); with value = 10,
-              # takes 685 seconds
-
-              # ttl = KEEPIDLE + (9 * 75) - cannot change INTVL and
-              # CNT per socket on Darwin
-
-              # set KEEPIDLE time (in seconds) - wait one minute
-              # before sending KEEPALIVE packet (for testing - use
-              # more realistic figure for real)
-              #p [:setting_keepalive]
-              opt = [60].pack('l')
-              s.setsockopt(Socket::IPPROTO_TCP, SocketExtensions::Darwin::TCP_KEEPALIVE, opt)
-            when /jruby/
-            else
-            end
+            socket_set_keepalive(s)
 
             _transmit(s, "CONNECT", headers)
             @connect = _receive(s)
@@ -342,6 +346,7 @@ module RStomp
       @open = false
     end
 
+    # TODO: do I really want this?
     # Return a pending message if one is available, otherwise
     # return nil
     def poll
@@ -441,7 +446,7 @@ module RStomp
 
     def transmit(command, headers = {}, body = '')
       # The transmit may fail so we may need to retry.
-      # Maybe use retry count?
+      # TODO: Maybe use retry count?
       while true
         begin
           _transmit(socket, command, headers, body)
@@ -480,7 +485,7 @@ module RStomp
     end
   end
 
-  # Container class for frames, misnamed technically
+  # Container class for frames (misnamed - should be Frame)
   class Message
     attr_accessor :headers, :body, :command
 
@@ -493,166 +498,4 @@ module RStomp
     end
   end
 
-  # Typical Stomp client class. Uses a listener thread to receive frames
-  # from the server, any thread can send.
-  #
-  # Receives all happen in one thread, so consider not doing much processing
-  # in that thread if you have much message volume.
-  class Client
-
-    # Accepts the same options as Connection.open
-    # Also accepts a :uri parameter of form 'stomp://host:port' or 'stomp://user:password@host:port' in place
-    # of :user, :password, :host and :port parameters
-    def initialize(params = {})
-      params = Connection::DEFAULT_OPTIONS.merge(params)
-      uri = params.delete(:uri)
-      if uri =~ /stomp:\/\/([\w\.]+):(\d+)/
-        params[:user] = ""
-        params[:password] = ""
-        params[:host] = $1
-        params[:port] = $2
-      elsif uri =~ /stomp:\/\/([\w\.]+):(\w+)@(\w+):(\d+)/
-        params[:user] = $1
-        params[:password] = $2
-        params[:host] = $3
-        params[:port] = $4
-      end
-
-      @id_mutex = Mutex.new
-      @ids = 1
-      @connection = Connection.open(params)
-      @listeners = {}
-      @receipt_listeners = {}
-      @running = true
-      @replay_messages_by_txn = {}
-      @listener_thread = Thread.start do
-        while @running
-          message = @connection.receive
-          break if message.nil?
-          case message.command
-          when 'MESSAGE'
-            if listener = @listeners[message.headers['destination']]
-              listener.call(message)
-            end
-          when 'RECEIPT'
-            if listener = @receipt_listeners[message.headers['receipt-id']]
-              listener.call(message)
-            end
-          end
-        end
-      end
-    end
-
-    # Join the listener thread for this client,
-    # generally used to wait for a quit signal
-    def join
-      @listener_thread.join
-    end
-
-    # Accepts the same options as Connection.open
-    def self.open(params = {})
-      params = Connection::DEFAULT_OPTIONS.merge(params)
-      Client.new(params)
-    end
-
-    # Begin a transaction by name
-    def begin(name, headers = {})
-      @connection.begin name, headers
-    end
-
-    # Abort a transaction by name
-    def abort(name, headers = {})
-      @connection.abort name, headers
-
-      # lets replay any ack'd messages in this transaction
-      replay_list = @replay_messages_by_txn[name]
-      if replay_list
-        replay_list.each do |message|
-          if listener = @listeners[message.headers['destination']]
-            listener.call(message)
-          end
-        end
-      end
-    end
-
-    # Commit a transaction by name
-    def commit(name, headers = {})
-      txn_id = headers[:transaction]
-      @replay_messages_by_txn.delete(txn_id)
-      @connection.commit(name, headers)
-    end
-
-    # Subscribe to a destination, must be passed a block taking one parameter (the message)
-    # which will be used as a callback listener
-    #
-    # Accepts a transaction header ( :transaction => 'some_transaction_id' )
-    def subscribe(destination, headers = {}, &block)
-      handle_error NoListenerError, "No listener given" unless block_given?
-      @listeners[destination] = block
-      @connection.subscribe(destination, headers)
-    end
-
-    # Unsubscribe from a channel
-    def unsubscribe(name, headers = {})
-      @connection.unsubscribe name, headers
-      @listeners[name] = nil
-    end
-
-    # Acknowledge a message, used when a subscription has specified
-    # client acknowledgement ( connection.subscribe "/queue/a", :ack => 'client' )
-    #
-    # Accepts a transaction header ( :transaction => 'some_transaction_id' )
-    def acknowledge(message, headers = {}, &block)
-      txn_id = headers[:transaction]
-      if txn_id
-        # lets keep around messages ack'd in this transaction in case we rollback
-        replay_list = @replay_messages_by_txn[txn_id]
-        if replay_list.nil?
-          replay_list = []
-          @replay_messages_by_txn[txn_id] = replay_list
-        end
-        replay_list << message
-      end
-      if block_given?
-        headers['receipt'] = register_receipt_listener(block)
-      end
-      @connection.ack(message.headers['message-id'], headers)
-    end
-
-    # Send message to destination
-    #
-    # If a block is given a receipt will be requested and passed to the
-    # block on receipt
-    #
-    # Accepts a transaction header ( :transaction => 'some_transaction_id' )
-    def send(destination, message, headers = {}, &block)
-      if block_given?
-        headers['receipt'] = register_receipt_listener(block)
-      end
-      @connection.send destination, message, headers
-    end
-
-    # Is this client open?
-    def open?
-      @connection.open?
-    end
-
-    # Close out resources in use by this client
-    def close
-      @connection.disconnect
-      @running = false
-    end
-
-    private
-    def register_receipt_listener(listener)
-      id = -1
-      @id_mutex.synchronize do
-        id = @ids.to_s
-        @ids = @ids.succ
-      end
-      @receipt_listeners[id] = listener
-      id
-    end
-
-  end
 end
