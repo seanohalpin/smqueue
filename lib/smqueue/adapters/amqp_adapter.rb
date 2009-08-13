@@ -12,35 +12,38 @@ module SMQueue
       super
       options = args.first
       @configuration = options[:configuration]
+      @client_thread = nil
     end
 
     def put(*args, &block)
-      EM.run {
-        broker = MQ.new
-        broker.queue(@configuration[:queue]).publish(args[0])
-        EM.add_timer(0.1) { EM.stop }
-      }
+      connect
+      channel.publish(args[0])
     end
 
     def get(*args, &block)
       if block_given?
         EM.run {
-          broker = MQ.new
-          broker.queue(@configuration[:queue]).subscribe { |header, body|
+          channel.subscribe { |header, body|
             yield ::SMQueue::Message(:headers => header, :body => body)
           }
         }
       else
-        @message = nil
-        EM.run {
-          broker = MQ.new
-          broker.queue(@configuration[:queue]).subscribe { |header, body|
-            @message = ::SMQueue::Message(:headers => header, :body => body)
-            EM.stop
-          }
-        }
-        @message
+        raise "TODO: Implement me"
       end
+    end
+
+    private
+    def connect
+      current_thread = Thread.current
+      @client_thread ||= Thread.new {
+        AMQP.start {
+          current_thread.wakeup
+        }
+      }
+    end
+
+    def channel
+      MQ.queue(@configuration[:queue])
     end
   end
 end
