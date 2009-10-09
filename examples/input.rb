@@ -7,6 +7,8 @@ configuration = YAML::load(File.read(File.join(script_path, "config", "example_c
 
 input_queue = SMQueue.new(:configuration => configuration[:input])
 
+p input_queue.get
+
 input_queue.get do |msg|
   pp msg
   puts "-" * 40

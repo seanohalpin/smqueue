@@ -1,0 +1,11 @@
+# -*- mode: ruby; -*-
+# simple bridge - copies message body to another queue
+require 'time'
+class Processor
+  def run
+    loop do
+      output_queue.put Time.now.iso8601
+      sleep 1
+    end
+  end
+end

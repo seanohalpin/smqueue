@@ -1,7 +1,6 @@
 mq: &default_mq
   :adapter: StompAdapter
   :host: localhost
-#  :host: 192.168.53.134
   :port: 61613
   :reconnect_delay: 5
 
@@ -20,15 +19,23 @@ mq: &default_mq
   :name: /topic/change_events
   :reliable: true
 
+# :input:
+#   <<: *default_mq
+#   :name: /queue/shared
+#   :reliable: true
+
+# :output:
+#   <<: *default_mq
+#   :name: /queue/shared
+#   :reliable: true
+
 :input:
-  <<: *default_mq
-  :name: /queue/shared
-  :reliable: true
+  :adapter: AMQPAdapter
+  :name: amqpuser
 
 :output:
-  <<: *default_mq
-  :name: /queue/shared
-  :reliable: true
+  :adapter: AMQPAdapter
+  :name: amqpuser
 
 :readline:
   :adapter: ReadlineAdapter
@@ -38,3 +45,22 @@ mq: &default_mq
 
 :error:
   :adapter: NullAdapter
+
+:null:
+  :adapter: NullAdapter
+
+:xmpp_pubsub_subscriber:
+  :adapter: XMPPPubSubAdapter
+  :host: localhost.private
+  :service: pubsub
+  :node: pub/updates
+  :anonymous: true
+
+:xmpp_pubsub_publisher:
+  :adapter: XMPPPubSubAdapter
+  :host: localhost.private
+  :service: pubsub
+  :node: pub/updates
+  :jid: pub@localhost.private/pubsub
+  :password: pub
+  :debug: false
