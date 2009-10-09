@@ -69,7 +69,7 @@ module SMQueue
 
   module ClassMethods
     def dbg(*args, &block)
-      if $DEBUG
+      if ENV["DEBUG_SMQUEUE"]
         if args.size > 0
           STDERR.print "SMQUEUE.DBG: "
           STDERR.puts(*args)
@@ -200,7 +200,7 @@ end
   adapter_path = File.join(base_path, 'smqueue', 'adapters', '*.rb')
   Dir[adapter_path].each do |file|
     begin
-      #puts "requiring #{file}"
+      SMQueue.dbg "requiring #{file}"
       require file
     rescue Object => e
       warn "warning: could not load adapter '#{file}'. Reason: #{e}"
