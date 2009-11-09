@@ -1,26 +1,45 @@
-# Look in the tasks/setup.rb file for the various options that can be
-# configured in this Rakefile. The .rake files in the tasks directory
-# are where the options are used.
-
+# Rakefile for smqueue
 begin
-  require 'bones'
-  Bones.setup
+  require 'jeweler'
+  Jeweler::Tasks.new do |s|
+    s.name              = "smqueue"
+    s.version           = "0.2.1"
+    s.summary           = "Simple Message Queue"
+    s.email             = "seanohalpin@gmail.com"
+    s.homepage          = 'http://github.com/seanohalpin/smqueue'
+    s.description       = "Implements a simple protocol for using message queues, with adapters
+  for ActiveMQ, Spread and stdio (for testing)."
+    s.authors           = ["Sean O'Halpin", "Chris O'Sullivan", "Craig Webster"]
+    s.files             =
+      [
+       "History.txt",
+       "Manifest.txt",
+       "README.txt",
+       "Rakefile",
+       "examples/input.rb",
+       "examples/output.rb",
+       "examples/config/example_config.yml",
+       "lib/rstomp.rb",
+       "lib/smqueue.rb",
+       "lib/smqueue/adapters/spread.rb",
+       "lib/smqueue/adapters/stdio.rb",
+       "lib/smqueue/adapters/stomp.rb",
+       "smqueue.gemspec",
+       "test/helper.rb",
+       "test/test_rstomp_connection.rb",
+      ]
+    s.test_files        = ["test/test_rstomp_connection.rb"]
+    s.add_dependency("doodle", [">= 0.1.9"])
+    s.rubyforge_project = 'smqueue'
+    s.extra_rdoc_files  = %w[
+History.txt
+Manifest.txt
+README.rdoc
+]
+    s.rdoc_options      = ["--charset=UTF-8 --line-numbers", "--inline-source", "--title", "Doodle", "--main", "README.rdoc"]
+    s.add_development_dependency('jeweler')
+  end
+  Jeweler::GemcutterTasks.new
 rescue LoadError
-  load 'tasks/setup.rb'
+  puts "Jeweler not available. Install it with: sudo gem install jeweler -s http://gemcutter.org"
 end
-
-ensure_in_path 'lib'
-require 'smqueue'
-
-task :default => "test"
-
-PROJ.name = 'smqueue'
-PROJ.authors = "Sean O'Halpin"
-PROJ.email = 'sean.ohalpin@gmail.com'
-PROJ.url = 'http://github.com/seanohalpin/smqueue'
-PROJ.version = SMQueue::VERSION
-PROJ.rubyforge.name = 'smqueue'
-
-PROJ.spec.opts << '--color'
-
-# EOF
