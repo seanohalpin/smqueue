@@ -6,7 +6,7 @@ module SMQueue
     class Configuration < AdapterConfiguration
     end
     def put(*args, &block)
-      STDOUT.puts *args
+      STDOUT.puts(*args)
     end
     def get(*args, &block)
       while input = STDIN.gets
