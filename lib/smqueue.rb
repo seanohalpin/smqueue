@@ -71,13 +71,13 @@ module SMQueue
   def self.require_all_libs_relative_to( fname, dir = nil )
     dir ||= ::File.basename(fname, '.*')
     search_me = ::File.expand_path(
-        ::File.join(::File.dirname(fname), dir, '*', '*.rb'))
+                                   ::File.join(::File.dirname(fname), dir, '*', '*.rb'))
 
     Dir.glob(search_me).sort.each {|rb| require rb}
   end
 
   # end Bones boilerplate
-  
+
   class << self
     def dbg(*args, &block)
       if $DEBUG
@@ -96,7 +96,7 @@ module SMQueue
     def calc_expiry_time(seconds = 86400 * 7) # one week
       ((Time.now.utc + seconds).to_f * 1000).to_i
     end
-    
+
     # resolve a string representing a classname
     def const_resolve(constant)
       constant.to_s.split(/::/).reject{|x| x.empty?}.inject(self) { |prev, this| prev.const_get(this) }
@@ -105,6 +105,7 @@ module SMQueue
 
   class AdapterConfiguration < Doodle
     has :logger, :default => nil
+    has :client_id, :default => nil
 
     # need to use custom to_yaml because YAML won't serialize classes
     def to_hash
@@ -144,6 +145,7 @@ module SMQueue
         h
       end
     end
+
     # these are not called anywhere...
     def open(*args, &block)
     end
@@ -164,7 +166,7 @@ module SMQueue
       klass = ac.adapter_class
       #p [:class, klass]
       #puts [:configuration, configuration].pretty_inspect
-#      klass.new(:configuration => configuration)
+      #      klass.new(:configuration => configuration)
       klass.new(:configuration => configuration)
     end
   end
@@ -178,20 +180,50 @@ module SMQueue
     has :headers, :default => { }
     has :body
   end
-  
+
   class << self
+    def default_config_path
+      "config/smq.yml"
+    end
     def new(*args, &block)
-      a = args.first
-      if a.kind_of?(Hash) && a.key?(:configuration)
-        args = [a[:configuration]]
+      # FIXME: this is a mess because I'm supporting too many ways to initialize
+      begin
+        a = args.first
+        #p [:new, :args_first, a]
+        if a.kind_of?(Hash)
+          if a.key?(:configuration)
+            #p [:new, :config_hash, a]
+            config = a[:configuration]
+          else
+            config = a
+          end
+        elsif args.size == 1 && a.kind_of?(Symbol) || a.kind_of?(String)
+          #p [:new, :default_config, a]
+          if !File.exist?(default_config_path)
+            raise RuntimeError, "Cannot find configuration file (default is #{default_config_path})"
+          end
+          @config ||= YAML::load(File.read(default_config_path))
+          #p [:new, :default_config, @config]
+          config = @config[a]
+          if config.nil?
+            raise NameError, "Configuration #{a.inspect} not found in config file #{default_config_path}"
+          end
+        end
+        #p [:new, :args, args]
+        if args.nil?
+          raise ArgumentError
+        end
+        #p [:create, args, config]
+        Adapter.create(config, &block)
+      rescue TypeError, ArgumentError => e
+        raise ArgumentError, "Bad args to SMQueue.new - #{args.inspect}. If using a message_queue.yml, check for spelling mistake."
       end
-      Adapter.create(*args, &block)
     end
   end
 
 end
 def SMQueue(*args, &block)
- SMQueue.new(*args, &block)
+  SMQueue.new(*args, &block)
 end
 
 # SMQueue.require_all_libs_relative_to(__FILE__)
