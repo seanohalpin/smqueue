@@ -1,4 +1,3 @@
-require 'rubygems'
 require 'smqueue'
 require 'pp'
 
