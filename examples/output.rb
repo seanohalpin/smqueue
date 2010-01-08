@@ -1,4 +1,3 @@
-require 'rubygems'
 require 'smqueue'
 
 script_path = File.dirname(__FILE__)
@@ -11,8 +10,10 @@ else
   input_queue_name = :readline
   output_queue_name = :output
 end
+puts "configure input"
 input_queue = SMQueue.new(:configuration => configuration[input_queue_name])
-output_queue = SMQueue.new(:configuration => configuration[output_queue_name])
+puts "configure output"
+output_queue = SMQueue.new(configuration[output_queue_name])
 
 input_queue.get do |msg|
   output_queue.put msg.body
