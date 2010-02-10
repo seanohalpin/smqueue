@@ -59,6 +59,17 @@ module SMQueue
 end
 
 module SMQueue
+  class StderrAdapter < Adapter
+    doc "outputs to STDERR"
+    class Configuration < AdapterConfiguration
+    end
+    def put(*args, &block)
+      STDERR.puts(*args)
+    end
+  end
+end
+
+module SMQueue
   class StdioAdapter < StdioLineAdapter
     doc "reads complete STDIN input, creates one shot Message with :body => input"
     def raw_get

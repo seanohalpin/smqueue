@@ -1,11 +1,8 @@
-require 'rubygems'
 require 'smqueue'
 require 'pp'
 
 script_path = File.dirname(__FILE__)
 configuration = YAML::load(File.read(File.join(script_path, "..", "config", "message_queue.yml")))
-
-#input_queue = SMQueue.new(:configuration => configuration[:stdio])
 
 input_name = (ARGV[0] || :readline).to_sym
 output_name = (ARGV[1] || :stdio).to_sym
