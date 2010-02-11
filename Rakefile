@@ -21,13 +21,10 @@ begin
        "examples/config/example_config.yml",
        "lib/rstomp.rb",
        "lib/smqueue.rb",
-       "lib/smqueue/adapters/spread.rb",
-       "lib/smqueue/adapters/stdio.rb",
-       "lib/smqueue/adapters/stomp.rb",
        "smqueue.gemspec",
        "test/helper.rb",
        "test/test_rstomp_connection.rb",
-      ]
+      ] + Dir["lib/smqueue/adapters/*.rb"]
     s.test_files        = ["test/test_rstomp_connection.rb"]
     s.add_dependency("doodle", [">= 0.1.9"])
     s.rubyforge_project = 'smqueue'
@@ -40,6 +37,6 @@ README.rdoc
     s.add_development_dependency('jeweler')
   end
   Jeweler::GemcutterTasks.new
-rescue LoadError
+rescue LoadError => e
   puts "Jeweler not available. Install it with: sudo gem install jeweler -s http://gemcutter.org"
 end

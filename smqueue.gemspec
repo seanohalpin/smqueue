@@ -5,16 +5,15 @@
 
 Gem::Specification.new do |s|
   s.name = %q{smqueue}
-  s.version = "0.2.1"
+  s.version = "0.3.0"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Sean O'Halpin", "Chris O'Sullivan", "Craig Webster"]
-  s.date = %q{2009-11-09}
-  s.default_executable = %q{smqueue}
-  s.description = %q{Implements a simple protocol for using message queues, with adapters
-  for ActiveMQ, Spread and stdio (for testing).}
+  s.date = %q{2010-02-11}
+  s.default_executable = %q{mqp}
+  s.description = %q{Implements a simple protocol for using message queues, with adapters for STOMP (ActiveMQ), AMQP, XMPP, Spread, HTTP and stdio.}
   s.email = %q{seanohalpin@gmail.com}
-  s.executables = ["smqueue"]
+  s.executables = ["mqp"]
   s.extra_rdoc_files = [
     "History.txt",
      "Manifest.txt",
@@ -30,9 +29,13 @@ Gem::Specification.new do |s|
      "examples/output.rb",
      "lib/rstomp.rb",
      "lib/smqueue.rb",
+     "lib/smqueue/adapters/amqp.rb",
+     "lib/smqueue/adapters/http_server.rb",
      "lib/smqueue/adapters/spread.rb",
      "lib/smqueue/adapters/stdio.rb",
      "lib/smqueue/adapters/stomp.rb",
+     "lib/smqueue/adapters/thread_queue.rb",
+     "lib/smqueue/adapters/xmpp_pubsub.rb",
      "smqueue.gemspec",
      "test/helper.rb",
      "test/test_rstomp_connection.rb"
