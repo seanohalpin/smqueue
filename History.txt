@@ -1,6 +1,11 @@
-== 0.3.0
+== 0.3.0 / 2010-02-11
 
 * Added ThreadQueueAdapter
+* Added AMQPAdapter (requires amqp)
+* Added XMPPPubSubAdapter (requires xmpp4r)
+* Added HTTPServer adapter (requires thin)
+
+See examples/config/example_config.yml for examples of how to configure these adapters.
 
 == 0.2.1 / 2009-01-25
 
