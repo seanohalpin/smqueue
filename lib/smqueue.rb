@@ -17,7 +17,6 @@
 
 require 'rubygems'
 require 'doodle'
-require 'doodle/version'
 require 'yaml'
 
 #class SMQueue < Doodle
