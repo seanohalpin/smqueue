@@ -29,13 +29,17 @@ mq: &default_mq
 #   :name: /queue/shared
 #   :reliable: true
 
+:gardenhose:
+  :adapter: AMQPAdapter
+  :name: gardenhose
+
 :input:
   :adapter: AMQPAdapter
-  :name: amqpuser
+  :name: input
 
 :output:
   :adapter: AMQPAdapter
-  :name: amqpuser
+  :name: input
 
 :readline:
   :adapter: ReadlineAdapter

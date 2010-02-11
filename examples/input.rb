@@ -11,7 +11,8 @@ else
 end
 input_queue = SMQueue.new(:configuration => configuration[queue_name])
 
-p input_queue.get
+# You can't mix these up with AMQP (not until I figure out how to unsubscribed AMQP)
+# p input_queue.get
 
 input_queue.get do |msg|
   pp msg
