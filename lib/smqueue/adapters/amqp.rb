@@ -28,7 +28,7 @@ module SMQueue
           The host that runs the broker you want to connect to.
         EDOC
       end
-      has :port, :kind => Integer, :default => 5673 do
+      has :port, :kind => Integer, :default => 5672 do
         doc <<-EDOC
           The port that your message broker is accepting connections on.
         EDOC
@@ -72,6 +72,7 @@ module SMQueue
       message = nil
       EventMachine.safe_run do
         connect
+        SMQueue.dbg { "connecting to queue: #{configuration.name}" }
         q = connection.queue(configuration.name)
         if block
           SMQueue.dbg { "entering loop get" }
@@ -85,7 +86,10 @@ module SMQueue
           q.subscribe do |msg|
             message = SMQueue::Message.new(:body => msg)
             SMQueue.dbg { [:get, :singleshot, :msg, msg].inspect }
-            q.unsubscribe
+            SMQueue.dbg { [:get, :unsubscribing].inspect }
+            q.unsubscribe(:nowait => false) do
+              SMQueue.dbg { [:get, :unsubscribed ] }
+            end
             ::EM.stop
           end
         end
