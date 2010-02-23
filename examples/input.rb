@@ -9,9 +9,11 @@ if ARGV.size > 0
 else
   queue_name = :input
 end
+# pp [queue_name, configuration[queue_name]]
+
 input_queue = SMQueue.new(:configuration => configuration[queue_name])
 
-# You can't mix these up with AMQP (not until I figure out how to unsubscribed AMQP)
+# You can't mix these up with the AMQPAdaptor (not until I figure out how to unsubscribe using AMQP)
 # p input_queue.get
 
 input_queue.get do |msg|
