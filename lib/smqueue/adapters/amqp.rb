@@ -1,6 +1,8 @@
 require 'mq'
 require 'pp'
 
+Thread.abort_on_exception = true
+
 module SMQueue
   class AMQPAdapter < Adapter
     module EventMachine
@@ -34,6 +36,16 @@ module SMQueue
         EDOC
       end
       has :name, :kind => String, :default => "", :doc => "name of queue to connect to"
+      has :kind, :kind => String, :default => "queue", :doc => "'queue' or 'fanout'" do
+        values = %w[queue fanout topic]
+        from Symbol do |s|
+          s.to_s
+        end
+        must "be one of #{values.join(', ')}" do |s|
+          values.include?(s)
+        end
+      end
+      has :exchange, :kind => String
       has :logfile, :default => STDERR do
         doc <<-EDOC
           Where should we log to. Default is STDERR.
@@ -73,7 +85,14 @@ module SMQueue
       EventMachine.safe_run do
         connect
         SMQueue.dbg { "connecting to queue: #{configuration.name}" }
-        q = connection.queue(configuration.name)
+        q = case configuration.kind
+            when "fanout"
+              connection.queue(configuration.name).bind(connection.fanout(configuration.exchange))
+            when "queue"
+              connection.queue(configuration.name)
+            else
+              raise Exception, "Unknown queue type: #{configuration.kind}"
+            end
         if block
           SMQueue.dbg { "entering loop get" }
           q.subscribe do |msg|
@@ -105,9 +124,19 @@ module SMQueue
         SMQueue.dbg { [:smqueue, :put, :connecting].inspect }
         self.connect
         SMQueue.dbg { [:smqueue, :put, :publishing].inspect }
-        q = connection.queue(configuration.name)
-        SMQueue.dbg { [:smqueue, :put, :after_publishing, q].pretty_inspect }
-        q.publish(body)
+        SMQueue.dbg { [:smqueue, :creating, configuration.kind].inspect }
+        #q = connection.send(configuration.exchange, configuration.name)
+        q = case configuration.kind
+            when "fanout"
+              connection.fanout(configuration.exchange)
+            when "queue"
+              connection.queue(configuration.name)
+            else
+              raise Exception, "Unknown exchange type: #{configuration.kind}"
+            end
+        SMQueue.dbg { [:smqueue, :put, :after_creation, q].pretty_inspect }
+        rv = q.publish(body)
+        SMQueue.dbg { [:smqueue, :put, :after_put, rv].pretty_inspect }
       end
       SMQueue.dbg { [:num_threads, Thread.list.size].inspect }
     end
