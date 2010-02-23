@@ -35,11 +35,15 @@ mq: &default_mq
 
 :input:
   :adapter: AMQPAdapter
-  :name: smqueue_example
+  :name: listener
+  :exchange: multicast
+  :kind: fanout
 
 :output:
   :adapter: AMQPAdapter
-  :name: smqueue_example
+  :name: publisher
+  :exchange: multicast
+  :kind: fanout
 
 :readline:
   :adapter: ReadlineAdapter
