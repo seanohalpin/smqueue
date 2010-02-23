@@ -3,12 +3,11 @@ begin
   require 'jeweler'
   Jeweler::Tasks.new do |s|
     s.name              = "smqueue"
-    s.version           = "0.2.1"
+    s.version           = "0.3.0"
     s.summary           = "Simple Message Queue"
     s.email             = "seanohalpin@gmail.com"
     s.homepage          = 'http://github.com/seanohalpin/smqueue'
-    s.description       = "Implements a simple protocol for using message queues, with adapters
-  for ActiveMQ, Spread and stdio (for testing)."
+    s.description       = "Implements a simple protocol for using message queues, with adapters for STOMP (ActiveMQ), AMQP, XMPP PubSub, HTTP, Spread and stdio (for testing)."
     s.authors           = ["Sean O'Halpin", "Chris O'Sullivan", "Craig Webster"]
     s.files             =
       [
