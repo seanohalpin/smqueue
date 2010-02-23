@@ -1,5 +1,6 @@
-== 0.3.0 / 2010-02-11
+== 0.3.0 / 2010-02-23
 
+* Don't bump off content-type for STOMP messages (http://github.com/craigw/smqueue/commit/b8ef318190ae0db4e6922bd41f1bc8ecb3b865a9)
 * Added ThreadQueueAdapter
 * Added AMQPAdapter (requires amqp)
 * Added XMPPPubSubAdapter (requires xmpp4r)
