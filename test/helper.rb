@@ -2,7 +2,7 @@ require 'rubygems'
 require 'test/unit'
 require 'mocha'
 
-require 'smqueue'
+require File.dirname(__FILE__) + '/../lib/smqueue'
 require 'rstomp'
 
 module ReadableTestNames
