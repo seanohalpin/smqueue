@@ -5,14 +5,13 @@
 
 Gem::Specification.new do |s|
   s.name = %q{smqueue}
-  s.version = "0.2.1"
+  s.version = "0.3.0"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Sean O'Halpin", "Chris O'Sullivan", "Craig Webster"]
-  s.date = %q{2010-02-11}
+  s.date = %q{2010-02-15}
   s.default_executable = %q{mqp}
-  s.description = %q{Implements a simple protocol for using message queues, with adapters
-  for ActiveMQ, Spread and stdio (for testing).}
+  s.description = %q{Implements a simple protocol for using message queues, with adapters for STOMP (ActiveMQ), AMQP, XMPP PubSub, HTTP, Spread and stdio (for testing).}
   s.email = %q{seanohalpin@gmail.com}
   s.executables = ["mqp"]
   s.extra_rdoc_files = [
