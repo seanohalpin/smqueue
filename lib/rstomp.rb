@@ -467,7 +467,9 @@ module RStomp
       msg.puts command
       headers.each {|k, v| msg.puts "#{k}: #{v}" }
       msg.puts "content-length: #{body.nil? ? 0 : body.length}"
-      msg.puts "content-type: text/plain; charset=UTF-8"
+      if !headers["content-type"]
+        msg.puts "content-type: text/plain; charset=UTF-8"
+      end
       msg.puts
       msg.write body
       msg.write "\0"
