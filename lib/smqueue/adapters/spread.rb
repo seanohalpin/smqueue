@@ -93,7 +93,8 @@ EDOC
       end
       m
     end
-    def put(msg)
+    def put(body, headers = { })
+      body, headers = normalize_message(body, headers)
       connect if !connected
       connection.multicast(msg, configuration.group, configuration.service_type, msg_type = 0, self_discard = true)
     end

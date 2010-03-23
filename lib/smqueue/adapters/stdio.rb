@@ -8,6 +8,10 @@
 
 module SMQueue
   class BaseStdioAdapter < Adapter
+    class Configuration < AdapterConfiguration
+      has :name, :default => "(stdio)"
+    end
+    has :name, :default => "(stdio)"
     doc "reads STDIN input, creates new Message for each line of input"
     class Configuration < AdapterConfiguration
     end
@@ -17,8 +21,9 @@ module SMQueue
     def raw_get
       STDIN.read
     end
-    def put(*args, &block)
-      raw_put(*args)
+    def put(body, headers = { }, &block)
+      body, headers = normalize_message(body, headers)
+      raw_put(body)
     end
     def get(*args, &block)
       while input = raw_get
@@ -40,30 +45,16 @@ module SMQueue
 end
 
 module SMQueue
-  class StdioLineAdapter < Adapter
+  class StdioLineAdapter < BaseStdioAdapter
     doc "reads STDIN input, creates new Message for each line of input"
-    class Configuration < AdapterConfiguration
-    end
-    def put(*args, &block)
-      STDOUT.puts(*args)
-    end
-    def get(*args, &block)
-      while input = STDIN.gets
-        msg = SMQueue::Message.new(:body => input)
-        if block_given?
-          yield(msg)
-        end
-      end
-    end
   end
 end
 
 module SMQueue
-  class StderrAdapter < Adapter
+  class StderrAdapter < BaseStdioAdapter
     doc "outputs to STDERR"
-    class Configuration < AdapterConfiguration
-    end
-    def put(*args, &block)
+    def put(body, headers = { }, &block)
+      body, headers = normalize_message(body, headers)
       STDERR.puts(*args)
     end
   end
@@ -81,18 +72,6 @@ module SMQueue
       if block_given?
         yield(msg)
       end
-    end
-  end
-end
-
-module SMQueue
-  class YamlAdapter < StdioAdapter
-    doc "outputs message as YAML"
-    def put(*args)
-      STDOUT.puts args.to_yaml
-    end
-    def raw_get(*args, &block)
-      YAML::load(STDIN.read)
     end
   end
 end

@@ -39,9 +39,11 @@ module SMQueue
       QUEUES[configuration.name] = self
     end
 
-    def put(*args, &block)
+    def put(body, headers = { }, &block)
+      body, headers = normalize_message(body, headers)
+      msg = SMQueue::Message.new(body, headers)
       #p [:tput, args]
-      thread_queue.enq(*args)
+      thread_queue.enq(msg)
     end
 
     def get(*args, &block)
@@ -49,7 +51,11 @@ module SMQueue
       loop do
         #p [:tget, :loop]
         input = thread_queue.deq
-        msg = SMQueue::Message.new(:body => input)
+        if input.kind_of?(SMQueue::Message)
+          msg = input
+        else
+          msg = SMQueue::Message.new(:body => input)
+        end
         yield(msg)
       end
     end

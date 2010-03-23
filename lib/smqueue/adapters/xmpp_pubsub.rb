@@ -178,22 +178,22 @@ module SMQueue
                                  },
                                  :body => payload
                                  )
-          if block_given?
-            yield(m)
-          else
-            break
-          end
-
+        if block_given?
+          yield(m)
+        else
+          break
+        end
       end
       m
     end
 
-    def put(msg)
-      logger.debug "put #{msg.inspect}"
+    def put(body, headers = { })
+      body, headers = normalize_message(body, headers)
+      logger.debug "put #{body.inspect}"
       connect if !connected
       item = PubSub::Item.new
       xml = REXML::Element.new("message")
-      xml.text = msg
+      xml.text = body
       item.add(xml);
       @pubsub.publish_item_to(node, item)
     end

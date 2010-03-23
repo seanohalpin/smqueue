@@ -336,6 +336,7 @@ module SMQueue
     #   :ack        => "auto"
     #   :expires    => configuration.expires
     def put(body, headers = { })
+      body, headers = normalize_message(body, headers)
       SMQueue.dbg { [:smqueue, :put, body, headers].inspect }
       begin
         self.connect

@@ -84,7 +84,8 @@ module SMQueue
       }
     end
 
-    def put(*args, &block)
+    def put(body, headers = { }, &block)
+      body, headers = normalize_message(body, headers)
       # RestClient?
       #p [:tput, args]
       # thread_queue.enq(*args)

@@ -45,7 +45,7 @@ module SMQueue
           values.include?(s)
         end
       end
-      has :exchange, :kind => String
+      has :exchange, :kind => String, :default => "direct"
       has :logfile, :default => STDERR do
         doc <<-EDOC
           Where should we log to. Default is STDERR.
@@ -119,6 +119,7 @@ module SMQueue
 
     # put a message on the queue
     def put(body, headers = { })
+      body, headers = normalize_message(body, headers)
       SMQueue.dbg { [:smqueue, :put, body, headers].inspect }
       EventMachine.safe_run(true) do
         SMQueue.dbg { [:smqueue, :put, :connecting].inspect }
