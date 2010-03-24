@@ -4,7 +4,7 @@ by Sean O'Halpin
 
 http://github.com/seanohalpin/smqueue
 
-version 0.2.1
+version 0.3.0
 
 == DESCRIPTION
 
@@ -65,7 +65,7 @@ For development:
 
 (The MIT License)
 
-Copyright (c) 2008 Sean O'Halpin
+Copyright (c) 2008-2010 Sean O'Halpin
 
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the
