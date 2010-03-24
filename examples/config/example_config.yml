@@ -89,3 +89,9 @@ mq: &default_mq
   :name: /topic/local2
   :reliable: true
 
+:pubsub_relay:
+  :adapter: AMQPAdapter
+  :host: localhost
+  :name: pubsub.relay
+  :exchange: pubsub.relay
+  :kind: queue
