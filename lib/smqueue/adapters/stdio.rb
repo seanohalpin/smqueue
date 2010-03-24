@@ -22,6 +22,7 @@ module SMQueue
       STDIN.read
     end
     def put(body, headers = { }, &block)
+      #p [:put, :body, body, :headers, headers]
       body, headers = normalize_message(body, headers)
       raw_put(body)
     end
