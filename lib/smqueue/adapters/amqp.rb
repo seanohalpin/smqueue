@@ -142,4 +142,5 @@ module SMQueue
       SMQueue.dbg { [:num_threads, Thread.list.size].inspect }
     end
   end
+  AmqpAdapter = AMQPAdapter
 end
