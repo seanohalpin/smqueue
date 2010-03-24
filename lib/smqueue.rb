@@ -94,6 +94,7 @@ module SMQueue
   extend ClassMethods
 
   class AdapterConfiguration < Doodle
+    has :name, :default => ""
     has :logger, :default => nil
     has :client_id, :default => nil
 
@@ -110,8 +111,13 @@ module SMQueue
     end
     has :adapter_class, :kind => Class do
       from String, Symbol do |s|
+        s = s.to_s
+        if s !~ /Adapter$/
+          s = "#{s.capitalize}Adapter"
+        end
         SMQueue.const_resolve(s.to_s)
       end
+
       # Note: use closure so this is not evaluated until after NullAdapter class has been defined
       default { NullAdapter }
     end
@@ -148,13 +154,16 @@ module SMQueue
       end
     end
 
-    # these are not called anywhere...
-    def open(*args, &block)
-    end
-    def close(*args, &block)
-    end
     # these are the core methods
     def get(*args, &block)
+    end
+    def normalize_message(body, headers)
+      # p [:normalize_message, body, headers]
+      if body.kind_of?(SMQueue::Message)
+        headers = body.headers.merge(headers)
+        body = body.body
+      end
+      [body, headers]
     end
     def put(*args, &block)
     end
@@ -216,6 +225,7 @@ module SMQueue
         if args.nil?
           raise ArgumentError
         end
+        config = Doodle::Utils.symbolize_keys(config, true)
         #p [:create, args, config]
         Adapter.create(config, &block)
       rescue TypeError, ArgumentError => e
@@ -240,7 +250,7 @@ end
       SMQueue.dbg "requiring #{file}"
       require file
     rescue Object => e
-      warn "warning: could not load adapter '#{file}'. Reason: #{e}"
+      # warn "warning: could not load adapter '#{file}'. Reason: #{e}"
     end
   end
 end
