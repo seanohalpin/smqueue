@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Sean O'Halpin", "Chris O'Sullivan", "Craig Webster"]
-  s.date = %q{2010-02-15}
+  s.date = %q{2010-03-24}
   s.default_executable = %q{mqp}
   s.description = %q{Implements a simple protocol for using message queues, with adapters for STOMP (ActiveMQ), AMQP, XMPP PubSub, HTTP, Spread and stdio (for testing).}
   s.email = %q{seanohalpin@gmail.com}
@@ -43,7 +43,7 @@ Gem::Specification.new do |s|
   s.rdoc_options = ["--charset=UTF-8 --line-numbers", "--inline-source", "--title", "Doodle", "--main", "README.rdoc"]
   s.require_paths = ["lib"]
   s.rubyforge_project = %q{smqueue}
-  s.rubygems_version = %q{1.3.5}
+  s.rubygems_version = %q{1.3.6}
   s.summary = %q{Simple Message Queue}
   s.test_files = [
     "test/test_rstomp_connection.rb"
