@@ -87,6 +87,7 @@ module SMQueue
         SMQueue.dbg { "connecting to queue: #{configuration.name}" }
         q = case configuration.kind
             when "fanout"
+              # connection.queue(configuration.name).bind(connection.exchange(configuration.exchange, :type => :fanout))
               connection.queue(configuration.name).bind(connection.fanout(configuration.exchange))
             when "queue"
               connection.queue(configuration.name)

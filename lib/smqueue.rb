@@ -225,7 +225,12 @@ module SMQueue
         if args.nil?
           raise ArgumentError
         end
+        # FIXME: hack to get around singleton can't be dumped
+        tmp_logger = config[:logger]
+        config[:logger] = nil
         config = Doodle::Utils.symbolize_keys(config, true)
+        config[:logger] = tmp_logger
+
         #p [:create, args, config]
         Adapter.create(config, &block)
       rescue TypeError, ArgumentError => e
