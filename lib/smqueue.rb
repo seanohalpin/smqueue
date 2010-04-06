@@ -247,15 +247,38 @@ end
 # SMQueue.require_all_libs_relative_to(__FILE__)
 
 # require adapters relative to invocation path first, then from lib
-[$0, __FILE__].each do |path|
-  base_path = File.expand_path(File.dirname(path))
+# [$0, __FILE__].each do |path|
+#   base_path = File.expand_path(File.dirname(path))
+#   adapter_path = File.join(base_path, 'smqueue', 'adapters', '*.rb')
+#   Dir[adapter_path].each do |file|
+#     begin
+#       SMQueue.dbg "requiring #{file}"
+#       require file
+#     rescue Object => e
+#       # warn "warning: could not load adapter '#{file}'. Reason: #{e}"
+#     end
+#   end
+# end
+base_dir = File.expand_path(File.dirname(__FILE__))
+SMQueue.autoload :AMQPAdapter, File.join(base_dir, "smqueue/adapters/amqp.rb")
+SMQueue.autoload :StdioAdapter, File.join(base_dir, "smqueue/adapters/stdio.rb")
+SMQueue.autoload :ReadlineAdapter, File.join(base_dir, "smqueue/adapters/stdio.rb")
+SMQueue.autoload :StdiolineAdapter, File.join(base_dir, "smqueue/adapters/stdio.rb")
+SMQueue.autoload :StderrAdapter, File.join(base_dir, "smqueue/adapters/stdio.rb")
+
+[$0, __FILE__].map{ |path| File.expand_path(File.dirname(path)) }.uniq.each do |base_path|
+  #p [:base_path, base_path]
   adapter_path = File.join(base_path, 'smqueue', 'adapters', '*.rb')
   Dir[adapter_path].each do |file|
     begin
-      SMQueue.dbg "requiring #{file}"
-      require file
+      basename = File.basename(file, File.extname(file))
+      const_name_prefix = Doodle::Utils.camelcase(basename)
+      # p [:file, file, basename, const_name_prefix]
+      const_name = "#{const_name_prefix}Adapter"
+      #p [:file, file, const_name]
+      SMQueue.autoload const_name, file
     rescue Object => e
-      # warn "warning: could not load adapter '#{file}'. Reason: #{e}"
+      warn "warning: could not load adapter '#{file}'. Reason: #{e}"
     end
   end
 end
