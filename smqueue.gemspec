@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Sean O'Halpin", "Chris O'Sullivan", "Craig Webster"]
-  s.date = %q{2010-03-30}
+  s.date = %q{2010-04-01}
   s.default_executable = %q{mqp}
   s.description = %q{Implements a simple protocol for using message queues, with adapters for STOMP (ActiveMQ), AMQP, XMPP PubSub, HTTP, Spread and stdio (for testing).}
   s.email = %q{seanohalpin@gmail.com}
@@ -35,6 +35,7 @@ Gem::Specification.new do |s|
      "lib/smqueue/adapters/stdio.rb",
      "lib/smqueue/adapters/stomp.rb",
      "lib/smqueue/adapters/thread_queue.rb",
+     "lib/smqueue/adapters/xmpp_pub_sub.rb",
      "lib/smqueue/adapters/xmpp_pubsub.rb",
      "smqueue.gemspec",
      "test/helper.rb",
