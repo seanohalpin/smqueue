@@ -41,7 +41,19 @@ mq: &default_mq
 
 :output:
   :adapter: AMQPAdapter
-  :name: publisher
+  :name: listener
+  :exchange: multicast
+  :kind: fanout
+
+:inputb:
+  :adapter: bunny
+  :name: listener
+  :exchange: multicast
+  :kind: fanout
+
+:outputb:
+  :adapter: bunny
+  :name: listener
   :exchange: multicast
   :kind: fanout
 
