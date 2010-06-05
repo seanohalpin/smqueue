@@ -13,8 +13,6 @@ module SMQueue
     end
     has :name, :default => "(stdio)"
     doc "reads STDIN input, creates new Message for each line of input"
-    class Configuration < AdapterConfiguration
-    end
     def raw_put(*args)
       STDOUT.puts(*args)
     end
@@ -56,7 +54,7 @@ module SMQueue
     doc "outputs to STDERR"
     def put(body, headers = { }, &block)
       body, headers = normalize_message(body, headers)
-      STDERR.puts(*args)
+      STDERR.puts(body)
     end
   end
 end
