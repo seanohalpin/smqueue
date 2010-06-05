@@ -42,6 +42,11 @@ module SMQueue
     end
     has :connection, :default => nil
 
+    # name
+    def name
+      configuration.name
+    end
+
     # handle an error
     def handle_error(exception_class, error_message, caller)
       #configuration.logger.warn error_message
