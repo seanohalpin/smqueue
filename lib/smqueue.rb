@@ -86,9 +86,9 @@ module SMQueue
     end
 
     # resolve a string representing a classname
-    def const_resolve(constant)
+    def const_resolve(constant, start = self)
       #Doodle::Utils.const_resolve(constant)
-      constant.to_s.split(/::/).reject{|x| x.empty?}.inject(self) { |prev, this| prev.const_get(this) }
+      constant.to_s.split(/::/).reject{|x| x.empty?}.inject(start) { |prev, this| prev.const_get(this) }
     end
   end
   extend ClassMethods
@@ -113,7 +113,8 @@ module SMQueue
       from String, Symbol do |s|
         s = s.to_s
         if s !~ /Adapter$/
-          s = "#{s.capitalize}Adapter"
+          #s = "#{s.capitalize}Adapter"
+          s = "#{Doodle::Utils.camelcase(s)}Adapter"
         end
         SMQueue.const_resolve(s.to_s)
       end
@@ -184,6 +185,9 @@ module SMQueue
   end
 
   class NullAdapter < Adapter
+    def name
+      "null"
+    end
     class Configuration < AdapterConfiguration
     end
   end
@@ -263,7 +267,7 @@ base_dir = File.expand_path(File.dirname(__FILE__))
 SMQueue.autoload :AMQPAdapter, File.join(base_dir, "smqueue/adapters/amqp.rb")
 SMQueue.autoload :StdioAdapter, File.join(base_dir, "smqueue/adapters/stdio.rb")
 SMQueue.autoload :ReadlineAdapter, File.join(base_dir, "smqueue/adapters/stdio.rb")
-SMQueue.autoload :StdiolineAdapter, File.join(base_dir, "smqueue/adapters/stdio.rb")
+SMQueue.autoload :StdioLineAdapter, File.join(base_dir, "smqueue/adapters/stdio.rb")
 SMQueue.autoload :StderrAdapter, File.join(base_dir, "smqueue/adapters/stdio.rb")
 
 [$0, __FILE__].map{ |path| File.expand_path(File.dirname(path)) }.uniq.each do |base_path|
