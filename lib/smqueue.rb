@@ -24,7 +24,7 @@ module SMQueue
 
   # Mr Bones project skeleton boilerplate
   # :stopdoc:
-  VERSION = '0.3.0'
+  VERSION = '0.4.0'
   LIBPATH = ::File.expand_path(::File.dirname(__FILE__)) + ::File::SEPARATOR
   PATH = ::File.dirname(LIBPATH) + ::File::SEPARATOR
   # :startdoc:
@@ -264,11 +264,11 @@ end
 #   end
 # end
 base_dir = File.expand_path(File.dirname(__FILE__))
-SMQueue.autoload :AMQPAdapter, File.join(base_dir, "smqueue/adapters/amqp.rb")
-SMQueue.autoload :StdioAdapter, File.join(base_dir, "smqueue/adapters/stdio.rb")
-SMQueue.autoload :ReadlineAdapter, File.join(base_dir, "smqueue/adapters/stdio.rb")
-SMQueue.autoload :StdioLineAdapter, File.join(base_dir, "smqueue/adapters/stdio.rb")
-SMQueue.autoload :StderrAdapter, File.join(base_dir, "smqueue/adapters/stdio.rb")
+SMQueue.autoload :AMQPAdapter, File.expand_path(File.join(base_dir, "smqueue/adapters/amqp.rb"))
+SMQueue.autoload :StdioAdapter, File.expand_path(File.join(base_dir, "smqueue/adapters/stdio.rb"))
+SMQueue.autoload :ReadlineAdapter, File.expand_path(File.join(base_dir, "smqueue/adapters/stdio.rb"))
+SMQueue.autoload :StdioLineAdapter, File.expand_path(File.join(base_dir, "smqueue/adapters/stdio.rb"))
+SMQueue.autoload :StderrAdapter, File.expand_path(File.join(base_dir, "smqueue/adapters/stdio.rb"))
 
 [$0, __FILE__].map{ |path| File.expand_path(File.dirname(path)) }.uniq.each do |base_path|
   #p [:base_path, base_path]
