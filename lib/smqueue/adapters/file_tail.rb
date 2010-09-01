@@ -1,6 +1,5 @@
 # FileTailAdapter
-
-require File.join(File.dirname(__FILE__), "stdio.rb")
+# gem install file-tail
 require 'file/tail'
 
 module SMQueue
