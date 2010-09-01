@@ -66,17 +66,24 @@ module SMQueue
       end
     end
 
+    def uuid
+      `uuidgen`.chomp
+    end
+
     # get message from queue
     def get(headers = {}, &block)
       message = nil
       connect
-      SMQueue.dbg { "connecting to queue: #{configuration.name}" }
+      SMQueue.dbg { "connecting to queue: #{configuration.name} #{configuration.kind.inspect}" }
       case configuration.kind
       when "fanout"
-        exchange = connection.exchange(configuration.exchange, :type => :fanout)
-        q = connection.queue(configuration.name)
+        SMQueue.dbg { "get from fanout" }
+        exchange = connection.exchange(configuration.exchange, :type => :fanout, :auto_delete => true)
+        # FIXME: queues binding to fanout exchanges must have unique names - need more than this
+        q = connection.queue(configuration.name + ".#{uuid}", :auto_delete => true)
         q.bind(exchange)
       when "queue"
+        SMQueue.dbg { "get from queue" }
         q = connection.queue(configuration.name)
       else
         raise Exception, "Unknown queue type: #{configuration.kind}"
@@ -108,16 +115,18 @@ module SMQueue
       SMQueue.dbg { [:smqueue, :put, :publishing].inspect }
       SMQueue.dbg { [:smqueue, :creating, configuration.kind].inspect }
       #q = connection.send(configuration.exchange, configuration.name)
-      q = case configuration.kind
+      channel = case configuration.kind
           when "fanout"
+            SMQueue.dbg { "put to fanout" }
             connection.exchange(configuration.exchange, :type => :fanout)
           when "queue"
+            SMQueue.dbg { "put to queue" }
             connection.queue(configuration.name)
           else
             raise Exception, "Unknown exchange type: #{configuration.kind}"
           end
-      SMQueue.dbg { [:smqueue, :put, :after_creation, q].pretty_inspect }
-      rv = q.publish(body)
+      SMQueue.dbg { [:smqueue, :put, :after_creation, channel].pretty_inspect }
+      rv = channel.publish(body)
       SMQueue.dbg { [:smqueue, :put, :after_put, rv].pretty_inspect }
     end
   end

@@ -13,11 +13,17 @@ module SMQueue
     end
     has :name, :default => "(stdio)"
     doc "reads STDIN input, creates new Message for each line of input"
+    class Configuration < AdapterConfiguration
+    end
     def raw_put(*args)
       STDOUT.puts(*args)
     end
     def raw_get
-      STDIN.read
+      line = STDIN.gets
+      if line
+        line = line.chomp
+      end
+      line
     end
     def put(body, headers = { }, &block)
       #p [:put, :body, body, :headers, headers]
