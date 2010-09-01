@@ -23,6 +23,7 @@ Gem::Specification.new do |s|
      "examples/config/example_config.yml",
      "examples/input.rb",
      "examples/output.rb",
+     "examples/file_tail_test.rb",
      "lib/rstomp.rb",
      "lib/smqueue.rb",
      "lib/smqueue/adapters/amqp.rb",
