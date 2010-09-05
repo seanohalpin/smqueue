@@ -24,8 +24,12 @@ Gem::Specification.new do |s|
      "examples/input.rb",
      "examples/output.rb",
      "examples/file_tail_test.rb",
+     "lib/load_paths.rb",
+     "lib/logutil.rb",
      "lib/rstomp.rb",
      "lib/smqueue.rb",
+     "lib/socketutil.rb",
+     "lib/this_method.rb",
      "lib/smqueue/adapters/amqp.rb",
      "lib/smqueue/adapters/bunny.rb",
      "lib/smqueue/adapters/http_server.rb",
@@ -49,6 +53,7 @@ Gem::Specification.new do |s|
     "test/test_rstomp_connection.rb"
   ]
 
-  s.add_dependency(%q<doodle>, [">= 0.1.9"])
+  s.add_dependency("doodle", [">= 0.2.4"])
+  s.add_dependency("logging")
 end
 
