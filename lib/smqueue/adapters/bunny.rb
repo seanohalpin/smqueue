@@ -39,6 +39,7 @@ module SMQueue
       end #'
       has :user, :default => "guest"
       has :password, :default => "guest"
+      has :ack, :default => true
     end
     has :connection, :default => nil
 
@@ -90,17 +91,39 @@ module SMQueue
       end
       if block
         SMQueue.dbg { "entering loop get" }
-        q.subscribe do |msg|
+        options = { }
+        if configuration.ack
+          options[:ack] = true
+        end
+        q.subscribe options do |msg|
+        # q.subscribe do |msg|
+          # p [:get, :loop, :msg, msg]
           SMQueue.dbg { [:get, :loop, :msg, msg].inspect }
           message = SMQueue::Message.new(:body => msg[:payload])
+          delivery_tag = msg[:delivery_details][:delivery_tag]
           block.call(message)
+          # p [:get, :ack, :delivery_tag, delivery_tag]
+          SMQueue.dbg { [:get, :ack, :delivery_tag, delivery_tag].inspect }
+          if configuration.ack
+            q.ack(:delivery_tag => delivery_tag, :multiple => false)
+            # this is a hack - otherwise bunny raises exception
+            q.delivery_tag = delivery_tag
+          end
         end
       else
         SMQueue.dbg { "singleshot get" }
-        while msg.nil?
-          msg = q.pop
+        options = { :message_max => 1 }
+        if configuration.ack
+          options[:ack] = true
+        end
+        q.subscribe options do |msg|
+          SMQueue.dbg { [:bunny, :get, :loop, :msg, msg].inspect }
           message = SMQueue::Message.new(:body => msg[:payload])
-          sleep 0.1
+          if configuration.ack
+            q.ack(:delivery_tag => delivery_tag, :multiple => false)
+            # this is a hack - otherwise bunny raises exception
+            q.delivery_tag = delivery_tag
+          end
         end
       end
       SMQueue.dbg { [:smqueue, :get, headers].inspect }
