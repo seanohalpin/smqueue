@@ -41,7 +41,7 @@ module SMQueue
 
     def put(body, headers = { }, &block)
       body, headers = normalize_message(body, headers)
-      msg = SMQueue::Message.new(body, headers)
+      msg = SMQueue::Message.new(:body => body, :headers => headers)
       #p [:tput, args]
       thread_queue.enq(msg)
     end
@@ -61,4 +61,3 @@ module SMQueue
     end
   end
 end
-
