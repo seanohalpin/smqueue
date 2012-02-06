@@ -24,4 +24,3 @@ module SMQueue
     end
   end
 end
-

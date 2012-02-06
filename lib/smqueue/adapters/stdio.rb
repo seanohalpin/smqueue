@@ -17,6 +17,7 @@ module SMQueue
     end
     def raw_put(*args)
       STDOUT.puts(*args)
+      STDOUT.flush
     end
     def raw_get
       line = STDIN.gets

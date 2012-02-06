@@ -23,6 +23,13 @@ require 'thread'
 require 'stringio'
 require 'logger'
 
+if !1.respond_to?(:ord)
+  class Integer
+    def ord
+      self
+    end
+  end
+end
 
 # use keepalive to detect dead connections (see http://tldp.org/HOWTO/TCP-Keepalive-HOWTO/)
 
@@ -380,13 +387,13 @@ module RStomp
 
     private
     def _receive( s )
-      #logger.debug "_receive"
+      # logger.debug "_receive"
       line = ' '
       @read_semaphore.synchronize do
-        #logger.debug "inside semaphore"
+        # logger.debug "inside semaphore"
         # skip blank lines
-        while line =~ /^\s*$/
-          #logger.debug "skipping blank line " + s.inspect
+        while line =~ /^[\s]*$/
+          # logger.debug "skipping blank line"
           line = s.gets
         end
         if line.nil?
@@ -394,24 +401,29 @@ module RStomp
           raise NoDataError, "connection returned nil"
           nil
         else
-          #logger.debug "got message data"
+          # logger.debug "got message data [#{line.inspect}]"
           Message.new do |m|
             m.command = line.chomp
+            # logger.debug "COMMAND: #{m.command}"
             m.headers = {}
+            # logger.debug "Reading headers"
             until (line = s.gets.chomp) == ''
+              # logger.debug "line=[#{line}]"
               k = (line.strip[0, line.strip.index(':')]).strip
               v = (line.strip[line.strip.index(':') + 1, line.strip.length]).strip
               m.headers[k] = v
+              # logger.debug "#{k}=#{v}"
             end
 
             if m.headers['content-length']
+              # logger.debug "Content length: #{m.headers['content-length']}"
               m.body = s.read m.headers['content-length'].to_i
               # expect an ASCII NUL (i.e. 0)
               c = s.getc
-              handle_error InvalidContentLengthError, "Invalid content length received" unless c == 0
+              handle_error InvalidContentLengthError, "Invalid content length received (#{c.inspect})" unless c.ord == 0
             else
               m.body = ''
-              until (c = s.getc) == 0
+              until (c = s.getc).ord == 0
                 m.body << c.chr
               end
             end
@@ -426,7 +438,7 @@ module RStomp
             end
             m
             #c = s.getc
-            #handle_error InvalidFrameTerminationError, "Invalid frame termination received" unless c == 10
+            #handle_error InvalidFrameTerminationError, "Invalid frame termination received" unless c.ord == 10
           end
         end
       end
