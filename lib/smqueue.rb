@@ -193,8 +193,8 @@ module SMQueue
   end
 
   class Message < Doodle
-    has :headers, :default => { }
     has :body
+    has :headers, :default => { }
   end
 
   class << self
@@ -306,4 +306,3 @@ if __FILE__ == $0
   end
 
 end
-
